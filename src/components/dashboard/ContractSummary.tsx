@@ -41,7 +41,7 @@ export function ContractSummary() {
   const itemsPerPage = 2;
 
   const sortedContracts = useMemo(() => {
-    let sortableItems = [...contractsData];
+    const sortableItems = [...contractsData];
     if (sortConfig !== null) {
       sortableItems.sort((a, b) => {
         if (a[sortConfig.key] < b[sortConfig.key]) {

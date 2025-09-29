@@ -2,7 +2,7 @@ import React, { createContext, useState, useContext } from 'react';
 
 const AIAssistantContext = createContext({
   isAIAssistantOpen: false,
-  toggleAIAssistant: () => {},
+  toggleAIAssistant: () => { console.log('toggleAIAssistant'); },
 });
 
 export const useAIAssistant = () => useContext(AIAssistantContext);

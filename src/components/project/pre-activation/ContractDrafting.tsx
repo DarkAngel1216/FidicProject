@@ -3,62 +3,8 @@ import { ArrowRightIcon, ZapIcon, BrainIcon, HistoryIcon, CheckIcon, FileTextIco
 import jsPDF from 'jspdf';
 import { AIAssistant } from '../../ai/AIAssistant';
 
-const redBookContent = `
-Clause 8.4 - Extension of Time for Completion
-The Contractor shall be entitled subject to Sub-Clause 20.1 [Contractor's Claims] to an extension of the Time for Completion if and to the extent that completion for the purposes of Sub-Clause 10.1 [Taking Over of the Works and Sections] is or will be delayed by any of the following causes:
-a) a Variation (unless an adjustment to the Time for Completion has been agreed under Sub-Clause 13.3 [Variation Procedure])
-b) a cause of delay giving an entitlement to extension of time under a Sub-Clause of these Conditions
-c) exceptionally adverse climatic conditions
-d) Unforeseeable shortages in the availability of personnel or Goods caused by epidemic or governmental actions
+import { useTemplates } from '../../../context/TemplateContext';
 
-Clause 14.7 - Payment
-Payment shall be made by the Employer to the Contractor in accordance with the provisions of this Clause.
-
-Clause 15.2 - Termination by Employer
-The Employer shall be entitled to terminate the Contract if the Contractor:
-a) fails to comply with a notice to correct
-b) abandons the Works or otherwise plainly demonstrates the intention not to continue performance of his obligations under the Contract
-
-Clause 19.1 - Force Majeure
-"Force Majeure" means an exceptional event or circumstance:
-a) which is beyond a Party's control;
-b) which such Party could not reasonably have provided against before entering into the Contract;
-c) which, having arisen, such Party could not reasonably have avoided or overcome; and
-d) which is not substantially attributable to the other Party.
-
-Clause 20.1 - Contractor's Claims
-If the Contractor considers himself to be entitled to any extension of the Time for Completion and/or any additional payment, under any Clause of these Conditions or otherwise in connection with the Contract, the Contractor shall give notice to the Engineer, describing the event or circumstance giving rise to the claim. The notice shall be given as soon as practicable, and not later than 28 days after the Contractor became aware, or should have become aware, of the event or circumstance.
-`;
-
-const yellowBookContent = `This is the content for FIDIC Yellow Book 2017.
-
-Clause 1: General Provisions
-...
-`;
-const silverBookContent = `This is the content for FIDIC Silver Book 2017.
-
-Clause 1: General Provisions
-...
-`;
-
-const initialTemplates = [{
-  id: 'fidic-red-book',
-  name: 'FIDIC Red Book 2017',
-  description: 'Conditions of Contract for Construction',
-  content: redBookContent
-}, {
-  id: 'fidic-yellow-book',
-  name: 'FIDIC Yellow Book 2017',
-  description: 'Plant and Design-Build',
-  content: yellowBookContent
-}, {
-  id: 'fidic-silver-book',
-  name: 'FIDIC Silver Book 2017',
-  description: 'EPC/Turnkey Projects',
-  content: silverBookContent
-}];
-
-// Simple diff function
 const generateDiff = (original, modified) => {
   const originalLines = original.split('\n');
   const modifiedLines = modified.split('\n');
@@ -94,7 +40,7 @@ export function ContractDrafting({
   language = 'english'
 }) {
   const isRTL = language === 'arabic';
-  const [templates, setTemplates] = useState(initialTemplates);
+  const { templates, addTemplate } = useTemplates();
   const [selectedTemplate, setSelectedTemplate] = useState('fidic-red-book');
   const [showAiAssistant, setShowAiAssistant] = useState(false);
   const [contractContent, setContractContent] = useState(templates.find(t => t.id === selectedTemplate)?.content || '');
@@ -102,6 +48,7 @@ export function ContractDrafting({
   const [viewMode, setViewMode] = useState('edit'); // 'edit' or 'diff'
   const [showNamePopup, setShowNamePopup] = useState(false);
   const [draftName, setDraftName] = useState('');
+  const [isSaved, setIsSaved] = useState(false);
   
   const editorContainerRef = useRef(null);
   const textareaRef = useRef(null);
@@ -117,6 +64,7 @@ export function ContractDrafting({
       setSelectedTemplate(templateId);
       setContractContent(template.content);
       setOriginalContractContent(template.content);
+      setIsSaved(false);
     }
   };
 
@@ -130,14 +78,11 @@ export function ContractDrafting({
       const reader = new FileReader();
       reader.onload = (e) => {
         const content = e.target.result;
-        const newTemplate = {
-          id: `custom-${Date.now()}`,
+        addTemplate({
           name: file.name,
           description: 'Custom uploaded template',
           content: content,
-        };
-        setTemplates(prevTemplates => [...prevTemplates, newTemplate]);
-        handleTemplateSelect(newTemplate.id);
+        });
       };
       reader.readAsText(file);
     }
@@ -145,17 +90,16 @@ export function ContractDrafting({
 
   const handleResetToOriginal = () => {
     setContractContent(originalContractContent);
+    setIsSaved(false);
   };
 
   const handleSaveChanges = () => {
-    // In a real app, this would save the entire contract to the backend.
-    // For this demo, we can update the original content state.
     setOriginalContractContent(contractContent);
+    setIsSaved(true);
     alert('Contract changes saved!');
   };
 
   const handleDownload = () => {
-    handleSaveChanges();
     const doc = new jsPDF();
     doc.text(contractContent, 10, 10);
     doc.save('contract-draft.pdf');
@@ -170,9 +114,12 @@ export function ContractDrafting({
     setShowNamePopup(false);
   };
 
+  const selectedTemplateData = templates.find(t => t.id === selectedTemplate);
+
   const diffResult = generateDiff(originalContractContent, contractContent);
 
-  return <div className="space-y-6"> 
+  return (
+    <div className="space-y-6">
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
         <h3 className="text-sm font-medium text-blue-800 mb-2">
           {isRTL ? 'صياغة العقد' : 'Contract Drafting'}
@@ -235,7 +182,20 @@ export function ContractDrafting({
               </div>
             </div>
             <div className="md:col-span-2">
-              <div ref={editorContainerRef} className="bg-white border border-gray-200 rounded-lg p-4 relative">
+              <div 
+                ref={editorContainerRef} 
+                className="bg-white border border-gray-200 rounded-lg p-4 relative"
+                style={{
+                  fontFamily: selectedTemplateData?.font || 'Arial',
+                  backgroundColor: selectedTemplateData?.pageColor || '#FFFFFF',
+                  border: `${selectedTemplateData?.borderWidth || 1}px solid ${selectedTemplateData?.borderColor || '#000000'}`
+                }}
+              >
+                {selectedTemplateData?.logo && (
+                  <div style={{ position: 'relative', textAlign: selectedTemplateData.logoPosition === 'center' ? 'center' : 'left' }}>
+                    <img src={selectedTemplateData.logo} alt="logo" style={{ width: '150px', height: 'auto' }} />
+                  </div>
+                )}
                 <div className="flex justify-between items-center mb-4">
                   <div className="flex items-center">
                     <h3 className="text-sm font-medium text-gray-800">
@@ -261,7 +221,11 @@ export function ContractDrafting({
                       <CheckIcon size={14} className="mr-1" />
                       {isRTL ? 'حفظ التغييرات' : 'Save Changes'}
                     </button>
-                    <button className="px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-50 rounded-lg hover:bg-blue-100 flex items-center transition-colors duration-200" onClick={handleDownload}>
+                    <button
+                      onClick={handleDownload}
+                      disabled={!isSaved}
+                      className="px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-50 rounded-lg hover:bg-blue-100 flex items-center transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
                       <DownloadIcon size={14} className="mr-1" />
                       {isRTL ? 'تحميل' : 'Download'}
                     </button>
@@ -275,18 +239,15 @@ export function ContractDrafting({
                 </div>
                 <div className="border border-gray-300 rounded-lg bg-white overflow-hidden">
                  {viewMode === 'edit' ? (
-                    <div className="p-3 relative">
-                        <textarea ref={textareaRef} className="w-full h-[600px] text-sm text-gray-800 focus:outline-none resize-y" value={contractContent} onChange={e => setContractContent(e.target.value)}></textarea>
-                        {/* Floating action buttons */}
-                        <div className="absolute bottom-3 right-3 flex space-x-2">
-                          <button className="p-2 bg-gray-100 hover:bg-gray-200 rounded-full text-gray-600 transition-colors duration-200" title="Format text">
-                            <CodeIcon size={14} />
-                          </button>
-                          <button className="p-2 bg-blue-100 hover:bg-blue-200 rounded-full text-blue-600 transition-colors duration-200" title="AI suggestions" onClick={() => setShowAiAssistant(true)}>
-                            <ZapIcon size={14} />
-                          </button>
-                        </div>
-                      </div>
+                    <div 
+                      ref={textareaRef} 
+                      className="w-full min-h-[600px] text-sm text-gray-800 focus:outline-none resize-y p-3 relative overflow-y-auto"
+                      contentEditable
+                      onInput={e => setContractContent(e.currentTarget.textContent || '')}
+                      style={{ whiteSpace: 'pre-wrap' }}
+                    >
+                      {contractContent}
+                    </div>
                   ) : (
                     <div className="w-full h-[600px] text-sm text-gray-800 overflow-y-auto font-mono">
                       <div className="flex text-xs text-gray-500 bg-gray-50 p-2 border-b border-gray-200">
@@ -388,4 +349,5 @@ export function ContractDrafting({
         </div>
       )}
     </div>
+  );
 }

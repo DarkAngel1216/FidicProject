@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { ContractEditor } from './ContractEditor';
 
 interface LayoutSettingsProps {
@@ -8,21 +8,32 @@ interface LayoutSettingsProps {
   setTitle: (title: string) => void;
   font: string;
   setFont: (font: string) => void;
+  pageColor: string;
+  setPageColor: (color: string) => void;
+  borderColor: string;
+  setBorderColor: (color: string) => void;
+  borderWidth: number;
+  setBorderWidth: (width: number) => void;
+  logoPosition: string;
+  setLogoPosition: (position: string) => void;
+  isOpen: boolean;
+  onClose: () => void;
 }
 
-export function LayoutSettings({ logo, setLogo, title, setTitle, font, setFont }: LayoutSettingsProps) {
-  const [isEditorOpen, setIsEditorOpen] = useState(false);
-
+export function LayoutSettings({ 
+  logo, setLogo, 
+  title, setTitle, 
+  font, setFont, 
+  pageColor, setPageColor,
+  borderColor, setBorderColor,
+  borderWidth, setBorderWidth,
+  logoPosition, setLogoPosition,
+  isOpen, 
+  onClose 
+}: LayoutSettingsProps) {
   return (
     <div>
-      <button 
-        onClick={() => setIsEditorOpen(true)} 
-        className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300"
-      >
-        Open Contract Editor
-      </button>
-
-      {isEditorOpen && (
+      {isOpen && (
         <ContractEditor
           logo={logo}
           setLogo={setLogo}
@@ -30,7 +41,15 @@ export function LayoutSettings({ logo, setLogo, title, setTitle, font, setFont }
           setTitle={setTitle}
           font={font}
           setFont={setFont}
-          onClose={() => setIsEditorOpen(false)}
+          pageColor={pageColor}
+          setPageColor={setPageColor}
+          borderColor={borderColor}
+          setBorderColor={setBorderColor}
+          borderWidth={borderWidth}
+          setBorderWidth={setBorderWidth}
+          logoPosition={logoPosition}
+          setLogoPosition={setLogoPosition}
+          onClose={onClose}
         />
       )}
     </div>

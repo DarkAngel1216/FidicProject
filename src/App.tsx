@@ -7,7 +7,7 @@ import { GlobalChatbot } from './components/ui/GlobalChatbot';
 import { AIAssistant } from './components/ai/AIAssistant';
 import { AIAssistantProvider, useAIAssistant } from './context/AIAssistantContext';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
-
+import { TemplateProvider } from './context/TemplateContext';
 function AppContent() {
   const [language, setLanguage] = useState('english');
   const [direction, setDirection] = useState<'ltr' | 'rtl'>('ltr');
@@ -44,7 +44,9 @@ export function App() {
   return (
     <ThemeProvider>
       <AIAssistantProvider>
-        <AppContent />
+        <TemplateProvider>
+          <AppContent />
+        </TemplateProvider>
       </AIAssistantProvider>
     </ThemeProvider>
   );
