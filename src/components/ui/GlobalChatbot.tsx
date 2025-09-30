@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { useAIAssistant } from '../../context/AIAssistantContext';
 import { MessageSquareTextIcon, XIcon, SendIcon, MinimizeIcon, MaximizeIcon, FileTextIcon, BrainIcon, BookOpenIcon, SettingsIcon, ChevronDownIcon } from 'lucide-react';
 interface GlobalChatbotProps {
   language?: string;
@@ -14,7 +13,8 @@ export function GlobalChatbot({
   language = 'english',
   projectContext
 }: GlobalChatbotProps) {
-  const { isAIAssistantOpen, toggleAIAssistant } = useAIAssistant();
+  // Local open state for the floating mini-chat, independent from the full-screen assistant
+  const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [messages, setMessages] = useState([{
     role: 'system',
@@ -44,12 +44,12 @@ export function GlobalChatbot({
   }];
   // Scroll to bottom of messages when new message is added
   useEffect(() => {
-    if (messagesEndRef.current && isAIAssistantOpen && !isMinimized) {
+    if (messagesEndRef.current && isOpen && !isMinimized) {
       messagesEndRef.current.scrollIntoView({
         behavior: 'smooth'
       });
     }
-  }, [messages, isAIAssistantOpen, isMinimized]);
+  }, [messages, isOpen, isMinimized]);
 
   const toggleMinimize = () => {
     setIsMinimized(!isMinimized);
@@ -91,11 +91,11 @@ export function GlobalChatbot({
   };
   return <>
       {/* Chatbot button */}
-      <button onClick={toggleAIAssistant} className="fixed bottom-6 right-6 bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition-all z-50" aria-label={isRTL ? 'فتح المساعد الذكي' : 'Open AI Assistant'}>
-        {isAIAssistantOpen ? <XIcon size={24} /> : <MessageSquareTextIcon size={24} />}
+      <button onClick={() => setIsOpen(prev => !prev)} className="fixed bottom-6 right-6 bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition-all z-50" aria-label={isRTL ? 'فتح المساعد الذكي' : 'Open AI Assistant'}>
+        {isOpen ? <XIcon size={24} /> : <MessageSquareTextIcon size={24} />}
       </button>
       {/* Chatbot window */}
-      {isAIAssistantOpen && <div className={`fixed bottom-20 right-6 bg-white rounded-lg shadow-xl border border-gray-200 transition-all z-50 ${isMinimized ? 'w-72 h-14' : 'w-96 h-[600px] max-h-[80vh]'} flex flex-col`}>
+      {isOpen && <div className={`fixed bottom-20 right-6 bg-white rounded-lg shadow-xl border border-gray-200 transition-all z-50 ${isMinimized ? 'w-72 h-14' : 'w-96 h-[600px] max-h-[80vh]'} flex flex-col`}>
           {/* Header */}
           <div className="flex items-center justify-between p-3 border-b border-gray-200 bg-blue-600 text-white rounded-t-lg">
             <div className="flex items-center">
@@ -108,7 +108,7 @@ export function GlobalChatbot({
               <button onClick={toggleMinimize} className="text-white hover:text-blue-100">
                 {isMinimized ? <MaximizeIcon size={18} /> : <MinimizeIcon size={18} />}
               </button>
-              <button onClick={toggleAIAssistant} className="text-white hover:text-blue-100">
+              <button onClick={() => setIsOpen(false)} className="text-white hover:text-blue-100">
                 <XIcon size={18} />
               </button>
             </div>

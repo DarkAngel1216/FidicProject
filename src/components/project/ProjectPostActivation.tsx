@@ -1,18 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { CalendarIcon, CheckIcon, ClockIcon, AlertTriangleIcon, FileTextIcon, MessageSquareTextIcon, CheckSquareIcon, BarChart2Icon } from 'lucide-react';
+import { AIAssistant } from '../ai/AIAssistant';
 
 interface ProjectPostActivationProps {
   projectId: string;
   subPhase?: string;
   setCurrentPhase?: (phase: string) => void;
+  language?: string;
 }
 
 export function ProjectPostActivation({
   projectId,
   subPhase,
-  setCurrentPhase
+  setCurrentPhase,
+  language = 'english'
 }: ProjectPostActivationProps) {
   const activeTab = subPhase || 'obligation-tracker';
+  const isRTL = language === 'arabic';
+  const [showAiAssistant, setShowAiAssistant] = useState(false);
 
   const handleTabClick = (tabId: string) => {
     if (setCurrentPhase) {
@@ -29,6 +34,9 @@ export function ProjectPostActivation({
           </button>
           <button className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">
             Add Item
+          </button>
+          <button className="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700" onClick={() => setShowAiAssistant(prev => !prev)}>
+            {showAiAssistant ? (isRTL ? 'إخفاء المساعد' : 'Hide Assistant') : (isRTL ? 'المساعد الذكي' : 'AI Assistant')}
           </button>
         </div>
       </div>
@@ -48,10 +56,19 @@ export function ProjectPostActivation({
           </button>
         </div>
         <div className="p-4">
-          {activeTab === 'obligation-tracker' && <ObligationTracker />}
-          {activeTab === 'disputes' && <DisputeManager />}
-          {activeTab === 'compliance' && <ComplianceChecklists />}
-          {activeTab === 'risk-monitoring' && <RiskMonitoring />}
+          <div className={`flex ${showAiAssistant ? 'space-x-4' : ''}`}>
+            <div className={`${showAiAssistant ? 'w-2/3' : 'w-full'}`}>
+              {activeTab === 'obligation-tracker' && <ObligationTracker />}
+              {activeTab === 'disputes' && <DisputeManager />}
+              {activeTab === 'compliance' && <ComplianceChecklists />}
+              {activeTab === 'risk-monitoring' && <RiskMonitoring />}
+            </div>
+            {showAiAssistant && (
+              <div className="w-1/3">
+                <AIAssistant onClose={() => setShowAiAssistant(false)} isRTL={isRTL} />
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
