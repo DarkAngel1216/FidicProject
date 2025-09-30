@@ -125,9 +125,9 @@ export function ProjectWorkspace({
       case 'pre-activation':
         return <ProjectPreActivation projectId={projectId} language={language} subPhase={subPhase} onActivate={() => setCurrentPhase('activation')} setCurrentPhase={setCurrentPhase} />;
       case 'activation':
-        return <ProjectActivation projectId={projectId} language={language} onActivate={handleActivateContract} subPhase={subPhase} setCurrentPhase={handleSetCurrentPhase} />;
+        return <ProjectActivation projectId={projectId} language={language} onActivate={handleActivateContract} subPhase={subPhase} setCurrentPhase={setCurrentPhase} />;
       case 'post-activation':
-        return <ProjectPostActivation projectId={projectId} language={language} subPhase={subPhase} setCurrentPhase={handleSetCurrentPhase} />;
+        return <ProjectPostActivation projectId={projectId} language={language} subPhase={subPhase} setCurrentPhase={setCurrentPhase} />;
       case 'reports':
         return <ProjectReports projectId={projectId} language={language} />;
       default:
