@@ -18,6 +18,24 @@ interface Document {
   aiAnalysis: DocumentAnalysis | null;
 }
 
+interface Dispute {
+  id: string;
+  title: string;
+  reference: string;
+  contract: string;
+  type: string;
+  status: string;
+  dateRaised: string;
+  clauseRef: string;
+  description: string;
+  documents: Document[];
+  timeline: Array<{
+    step: string;
+    date: string;
+    status: string;
+  }>;
+}
+
 interface ProjectPostActivationProps {
   projectId: string;
   subPhase?: string;
@@ -324,19 +342,175 @@ function ObligationTracker() {
     </div>
 }
 function DisputeManager() {
-  return <div className="space-y-6">
+  // State for dispute management
+  const [disputes, setDisputes] = useState<Dispute[]>([
+    {
+      id: '1',
+      title: 'Delivery Delay Claim',
+      reference: 'DSP-2023-001',
+      contract: 'Siemens Electrical Systems',
+      type: 'Time Extension',
+      status: 'In Progress',
+      dateRaised: '2023-12-05',
+      clauseRef: '8.4, 20.1',
+      description: 'Contractor has submitted a claim for a 30-day extension of time due to delays in material shipment caused by port congestion.',
+      documents: [
+        {
+          id: 'doc1',
+          name: 'Extension_Request_Letter.pdf',
+          type: 'Dispute Letter',
+          uploadDate: '2023-12-05',
+          status: 'analyzed' as const,
+          aiAnalysis: {
+            summary: 'Request for 30-day time extension due to port congestion delays',
+            keyPoints: [
+              'Cites Clause 8.4(d) for unforeseeable shortages',
+              'References port congestion as cause',
+              'Requests 30-day extension',
+              'Provides supporting documentation'
+            ],
+            suggestedResponse: 'partial_approval'
+          }
+        }
+      ],
+      timeline: [
+        { step: 'Claim Received', date: '2023-12-05', status: 'completed' },
+        { step: 'Response Drafted', date: '2023-12-07', status: 'completed' },
+        { step: 'Response Sent', date: '', status: 'pending' },
+        { step: 'Resolution', date: '', status: 'pending' }
+      ]
+    }
+  ]);
+
+  const [showNewDisputeModal, setShowNewDisputeModal] = useState(false);
+  const [showDisputeDetails, setShowDisputeDetails] = useState(false);
+  const [selectedDispute, setSelectedDispute] = useState<Dispute | null>(null);
+  const [showDocumentAnalysis, setShowDocumentAnalysis] = useState(false);
+  const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
+  const [dragActive, setDragActive] = useState(false);
+
+  // New dispute form state
+  const [newDispute, setNewDispute] = useState<{
+    title: string;
+    contract: string;
+    type: string;
+    description: string;
+    documents: Document[];
+  }>({
+    title: '',
+    contract: '',
+    type: '',
+    description: '',
+    documents: []
+  });
+
+  // Handle file upload for dispute documents
+  const handleDisputeFileUpload = (files: FileList) => {
+    const newDocuments = Array.from(files).map((file, index) => ({
+      id: `doc-${Date.now()}-${index}`,
+      name: file.name,
+      type: 'Dispute Letter',
+      uploadDate: new Date().toISOString().split('T')[0],
+      status: 'analyzing' as const,
+      aiAnalysis: null
+    }));
+
+    setNewDispute(prev => ({
+      ...prev,
+      documents: [...prev.documents, ...newDocuments]
+    }));
+
+    // Simulate AI analysis
+    setTimeout(() => {
+      setNewDispute(prev => ({
+        ...prev,
+        documents: prev.documents.map(doc => 
+          doc.status === 'analyzing' 
+            ? {
+                ...doc,
+                status: 'analyzed' as const,
+                aiAnalysis: {
+                  summary: 'AI analysis completed - dispute letter content processed and key information extracted',
+                  keyPoints: [
+                    'Dispute type identified',
+                    'Key contract clauses referenced',
+                    'Supporting evidence highlighted',
+                    'Response recommendations generated'
+                  ],
+                  suggestedResponse: 'review_required'
+                }
+              }
+            : doc
+        )
+      }));
+    }, 2000);
+  };
+
+  // Handle drag and drop for dispute documents
+  const handleDisputeDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
+    }
+  };
+
+  const handleDisputeDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handleDisputeFileUpload(e.dataTransfer.files);
+    }
+  };
+
+  // Create new dispute
+  const handleCreateDispute = () => {
+    const dispute = {
+      id: `dispute-${Date.now()}`,
+      title: newDispute.title,
+      reference: `DSP-2023-${String(disputes.length + 1).padStart(3, '0')}`,
+      contract: newDispute.contract,
+      type: newDispute.type,
+      status: 'New',
+      dateRaised: new Date().toISOString().split('T')[0],
+      clauseRef: 'TBD',
+      description: newDispute.description,
+      documents: newDispute.documents,
+      timeline: [
+        { step: 'Dispute Created', date: new Date().toISOString().split('T')[0], status: 'completed' },
+        { step: 'Documents Analyzed', date: '', status: 'completed' },
+        { step: 'Response Required', date: '', status: 'pending' },
+        { step: 'Resolution', date: '', status: 'pending' }
+      ]
+    };
+
+    setDisputes(prev => [dispute, ...prev]);
+    setShowNewDisputeModal(false);
+    setNewDispute({ title: '', contract: '', type: '', description: '', documents: [] });
+  };
+
+  return (
+    <div className="space-y-6">
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
         <h3 className="text-sm font-medium text-blue-800 mb-2">
-          Dispute Management
+          Dispute Management & AI Analysis
         </h3>
         <p className="text-xs text-blue-700">
-          Track and manage contract disputes, generate response drafts, and
-          monitor resolution progress.
+          Upload dispute letters, analyze content with AI, track disputes, and generate response drafts.
         </p>
       </div>
+      
       <div className="flex justify-between items-center">
         <h3 className="text-base font-medium text-gray-800">Active Disputes</h3>
-        <button className="px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-50 rounded-lg hover:bg-blue-100">
+        <button 
+          onClick={() => setShowNewDisputeModal(true)}
+          className="px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-50 rounded-lg hover:bg-blue-100 flex items-center"
+        >
+          <PlusIcon size={14} className="mr-1" />
           Add New Dispute
         </button>
       </div>
@@ -369,230 +543,575 @@ function DisputeManager() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              <tr>
-                <td className="px-4 py-3 whitespace-nowrap">
-                  <div className="flex items-center">
-                    <MessageSquareTextIcon size={16} className="text-purple-600 mr-2" />
-                    <div>
-                      <div className="text-sm font-medium text-gray-900">
-                        Delivery Delay Claim
+              {disputes.map((dispute) => (
+                <tr key={dispute.id} className="hover:bg-gray-50">
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    <div className="flex items-center">
+                      <MessageSquareTextIcon size={16} className="text-purple-600 mr-2" />
+                      <div>
+                        <div className="text-sm font-medium text-gray-900">
+                          {dispute.title}
+                        </div>
+                        <div className="text-xs text-gray-500">{dispute.reference}</div>
                       </div>
-                      <div className="text-xs text-gray-500">DSP-2023-001</div>
                     </div>
-                  </div>
-                </td>
-                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                  Siemens Electrical Systems
-                </td>
-                <td className="px-4 py-3 whitespace-nowrap">
-                  <span className="px-2 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-800">
-                    Time Extension
-                  </span>
-                </td>
-                <td className="px-4 py-3 whitespace-nowrap">
-                  <span className="px-2 py-1 text-xs font-medium rounded-full bg-amber-100 text-amber-800">
-                    In Progress
-                  </span>
-                </td>
-                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                  Dec 05, 2023
-                </td>
-                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                  8.4, 20.1
-                </td>
-                <td className="px-4 py-3 whitespace-nowrap text-center">
-                  <button className="text-xs text-blue-600 font-medium">
-                    View
-                  </button>
-                </td>
-              </tr>
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                    {dispute.contract}
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    <span className="px-2 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-800">
+                      {dispute.type}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                      dispute.status === 'In Progress' ? 'bg-amber-100 text-amber-800' :
+                      dispute.status === 'New' ? 'bg-blue-100 text-blue-800' :
+                      dispute.status === 'Resolved' ? 'bg-green-100 text-green-800' :
+                      'bg-gray-100 text-gray-800'
+                    }`}>
+                      {dispute.status}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                    {dispute.dateRaised}
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                    {dispute.clauseRef}
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap text-center">
+                    <button 
+                      onClick={() => {
+                        setSelectedDispute(dispute);
+                        setShowDisputeDetails(true);
+                      }}
+                      className="text-xs text-blue-600 font-medium hover:text-blue-800"
+                    >
+                      View
+                    </button>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
       </div>
-      <div className="bg-white border border-gray-200 rounded-lg p-4">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-sm font-medium text-gray-800">
-            Dispute Details: Delivery Delay Claim
-          </h3>
-          <span className="px-2 py-1 text-xs font-medium rounded-full bg-amber-100 text-amber-800">
-            In Progress
-          </span>
-        </div>
-        <div className="grid grid-cols-3 gap-4 mb-4">
-          <div className="col-span-2">
-            <div className="border border-gray-200 rounded-lg p-3 mb-4">
-              <h4 className="text-xs font-medium text-gray-700 mb-2">
-                Claim Description
-              </h4>
-              <p className="text-xs text-gray-600">
-                Contractor has submitted a claim for a 30-day extension of time
-                due to delays in material shipment caused by port congestion.
-                The claim cites Clause 8.4(d) regarding "Unforeseeable
-                shortages" and Clause 20.1 for the claim procedure.
-              </p>
-            </div>
-            <div className="border border-gray-200 rounded-lg p-3">
-              <h4 className="text-xs font-medium text-gray-700 mb-2">
-                AI-Generated Response Draft
-              </h4>
-              <p className="text-xs text-gray-600 mb-2">
-                Based on the contract terms and the evidence provided, the
-                following response is recommended:
-              </p>
-              <div className="bg-gray-50 p-2 rounded text-xs text-gray-600">
-                <p>Dear [Contractor Representative],</p>
-                <br />
-                <p>
-                  We acknowledge receipt of your Extension of Time claim dated
-                  December 5, 2023 regarding delays in material shipment.
-                </p>
-                <br />
-                <p>
-                  After careful review of the documentation provided and in
-                  accordance with Clause 8.4(d) of the Contract, we can confirm
-                  that:
-                </p>
-                <br />
-                <p>
-                  1. The port congestion situation does qualify as an
-                  "Unforeseeable shortage" as defined in the Contract.
-                </p>
-                <p>
-                  2. However, as per the negotiated terms in Clause 8.4(d), such
-                  shortages are limited to a maximum extension of 30 days.
-                </p>
-                <p>
-                  3. Based on the evidence provided, we are prepared to grant a
-                  20-day extension, as the actual delay attributable to this
-                  cause has been determined to be 20 days.
-                </p>
-                <br />
-                <p>
-                  Please note that this extension does not include any
-                  additional costs, which would need to be claimed separately
-                  under Clause 20.1.
-                </p>
-                <br />
-                <p>Sincerely,</p>
-                <p>[Employer Representative]</p>
+      {/* Dispute Details Modal */}
+      {showDisputeDetails && selectedDispute && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-6xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-lg font-medium text-gray-900">Dispute Details: {selectedDispute.title}</h2>
+                <button 
+                  onClick={() => {
+                    setShowDisputeDetails(false);
+                    setSelectedDispute(null);
+                  }}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <XIcon size={24} />
+                </button>
               </div>
-              <div className="flex justify-end mt-2">
-                <button className="text-xs text-blue-600 font-medium">
-                  Edit Draft
+
+              <div className="grid grid-cols-3 gap-6">
+                {/* Main Content */}
+                <div className="col-span-2 space-y-4">
+                  {/* Dispute Information */}
+                  <div className="border border-gray-200 rounded-lg p-4">
+                    <h3 className="text-sm font-medium text-gray-800 mb-3">Dispute Information</h3>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <span className="text-gray-600">Reference:</span>
+                        <span className="ml-2 font-medium">{selectedDispute.reference}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-600">Contract:</span>
+                        <span className="ml-2 font-medium">{selectedDispute.contract}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-600">Type:</span>
+                        <span className="ml-2 font-medium">{selectedDispute.type}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-600">Status:</span>
+                        <span className={`ml-2 px-2 py-1 text-xs font-medium rounded-full ${
+                          selectedDispute.status === 'In Progress' ? 'bg-amber-100 text-amber-800' :
+                          selectedDispute.status === 'New' ? 'bg-blue-100 text-blue-800' :
+                          selectedDispute.status === 'Resolved' ? 'bg-green-100 text-green-800' :
+                          'bg-gray-100 text-gray-800'
+                        }`}>
+                          {selectedDispute.status}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="mt-3">
+                      <span className="text-gray-600 text-sm">Description:</span>
+                      <p className="text-sm text-gray-700 mt-1">{selectedDispute.description}</p>
+                    </div>
+                  </div>
+
+                  {/* Dispute Documents */}
+                  <div className="border border-gray-200 rounded-lg p-4">
+                    <div className="flex justify-between items-center mb-3">
+                      <h3 className="text-sm font-medium text-gray-800">Dispute Documents</h3>
+                      <button className="px-3 py-1 text-xs font-medium text-blue-700 bg-blue-50 rounded hover:bg-blue-100">
+                        <PlusIcon size={12} className="mr-1" />
+                        Add Document
+                      </button>
+                    </div>
+                    <div className="space-y-3">
+                      {selectedDispute.documents.map((doc) => (
+                        <div key={doc.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                          <div className="flex items-center space-x-3">
+                            <FileIcon size={16} className="text-blue-600" />
+                            <div>
+                              <h4 className="text-sm font-medium text-gray-900">{doc.name}</h4>
+                              <div className="flex items-center space-x-4 text-xs text-gray-500">
+                                <span>{doc.type}</span>
+                                <span>Uploaded: {doc.uploadDate}</span>
+                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                  doc.status === 'analyzed' 
+                                    ? 'bg-green-100 text-green-800' 
+                                    : 'bg-yellow-100 text-yellow-800'
+                                }`}>
+                                  {doc.status === 'analyzed' ? 'Analyzed' : 'Analyzing...'}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <button 
+                              onClick={() => {
+                                setSelectedDocument(doc);
+                                setShowDocumentAnalysis(true);
+                              }}
+                              className="p-2 text-gray-400 hover:text-blue-600"
+                              title="View Analysis"
+                            >
+                              <EyeIcon size={16} />
+                            </button>
+                            <button className="p-2 text-gray-400 hover:text-gray-600" title="Download">
+                              <DownloadIcon size={16} />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* AI-Generated Response Draft */}
+                  <div className="border border-gray-200 rounded-lg p-4">
+                    <h3 className="text-sm font-medium text-gray-800 mb-3">AI-Generated Response Draft</h3>
+                    <p className="text-xs text-gray-600 mb-3">
+                      Based on the contract terms and the evidence provided, the following response is recommended:
+                    </p>
+                    <div className="bg-gray-50 p-3 rounded-lg text-xs text-gray-700 space-y-2">
+                      <p>Dear [Contractor Representative],</p>
+                      <br />
+                      <p>
+                        We acknowledge receipt of your {selectedDispute.type} claim dated {selectedDispute.dateRaised} regarding {selectedDispute.title.toLowerCase()}.
+                      </p>
+                      <br />
+                      <p>
+                        After careful review of the documentation provided and in accordance with the relevant contract clauses, we can confirm that:
+                      </p>
+                      <br />
+                      <p>1. [AI-generated response based on document analysis]</p>
+                      <p>2. [Specific action items or clarifications needed]</p>
+                      <p>3. [Timeline and next steps]</p>
+                      <br />
+                      <p>We look forward to your prompt response and continued collaboration.</p>
+                      <br />
+                      <p>Sincerely,</p>
+                      <p>[Employer Representative]</p>
+                    </div>
+                    <div className="flex justify-end mt-3 space-x-2">
+                      <button className="px-3 py-1 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">
+                        Edit Draft
+                      </button>
+                      <button className="px-3 py-1 text-xs font-medium text-white bg-blue-600 rounded hover:bg-blue-700">
+                        Send Response
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Sidebar */}
+                <div className="col-span-1 space-y-4">
+                  {/* Timeline */}
+                  <div className="border border-gray-200 rounded-lg p-4">
+                    <h3 className="text-sm font-medium text-gray-800 mb-3">Dispute Timeline</h3>
+                    <div className="space-y-3">
+                      {selectedDispute.timeline.map((item, index) => (
+                        <div key={index} className="flex items-start">
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center">
+                              <div className={`h-6 w-6 rounded-full flex items-center justify-center ${
+                                item.status === 'completed' ? 'bg-green-100 text-green-600' :
+                                item.status === 'in-progress' ? 'bg-blue-100 text-blue-600' :
+                                'bg-gray-100 text-gray-400'
+                              }`}>
+                                {item.status === 'completed' ? <CheckIcon size={12} /> :
+                                 item.status === 'in-progress' ? <ClockIcon size={12} /> :
+                                 <MessageSquareTextIcon size={12} />}
+                              </div>
+                              <p className="ml-2 text-xs font-medium text-gray-900">
+                                {item.step}
+                              </p>
+                            </div>
+                            <p className="mt-0.5 ml-8 text-xs text-gray-500">
+                              {item.date || 'Pending'}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Contract Clauses */}
+                  <div className="border border-gray-200 rounded-lg p-4">
+                    <h3 className="text-sm font-medium text-gray-800 mb-3">Contract Clauses</h3>
+                    <div className="space-y-2">
+                      <div className="bg-gray-50 p-2 rounded">
+                        <p className="text-xs font-medium text-gray-800">Clause 8.4(d)</p>
+                        <p className="text-xs text-gray-600">
+                          Unforeseeable shortages in the availability of personnel or Goods caused by epidemic or governmental actions
+                        </p>
+                      </div>
+                      <div className="bg-gray-50 p-2 rounded">
+                        <p className="text-xs font-medium text-gray-800">Clause 20.1</p>
+                        <p className="text-xs text-gray-600">
+                          Contractor's Claims procedure and notice requirements
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="border border-gray-200 rounded-lg p-4">
+                    <h3 className="text-sm font-medium text-gray-800 mb-3">Actions</h3>
+                    <div className="space-y-2">
+                      <button className="w-full px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-50 rounded hover:bg-blue-100">
+                        Send Response
+                      </button>
+                      <button className="w-full px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">
+                        Request More Information
+                      </button>
+                      <button className="w-full px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">
+                        Schedule Meeting
+                      </button>
+                      <button className="w-full px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">
+                        Generate Response Draft
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* New Dispute Modal */}
+      {showNewDisputeModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-lg font-medium text-gray-900">Create New Dispute</h2>
+                <button 
+                  onClick={() => {
+                    setShowNewDisputeModal(false);
+                    setNewDispute({ title: '', contract: '', type: '', description: '', documents: [] });
+                  }}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <XIcon size={24} />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-2 gap-6">
+                {/* Form */}
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Dispute Title</label>
+                    <input
+                      type="text"
+                      value={newDispute.title}
+                      onChange={(e) => setNewDispute(prev => ({ ...prev, title: e.target.value }))}
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                      placeholder="Enter dispute title"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Contract</label>
+                    <select
+                      value={newDispute.contract}
+                      onChange={(e) => setNewDispute(prev => ({ ...prev, contract: e.target.value }))}
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                    >
+                      <option value="">Select Contract</option>
+                      <option value="Siemens Electrical Systems">Siemens Electrical Systems</option>
+                      <option value="ABB Electrical Equipment">ABB Electrical Equipment</option>
+                      <option value="Orascom Civil Works">Orascom Civil Works</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Dispute Type</label>
+                    <select
+                      value={newDispute.type}
+                      onChange={(e) => setNewDispute(prev => ({ ...prev, type: e.target.value }))}
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                    >
+                      <option value="">Select Type</option>
+                      <option value="Time Extension">Time Extension</option>
+                      <option value="Cost Claim">Cost Claim</option>
+                      <option value="Quality Issue">Quality Issue</option>
+                      <option value="Payment Dispute">Payment Dispute</option>
+                      <option value="Force Majeure">Force Majeure</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                    <textarea
+                      value={newDispute.description}
+                      onChange={(e) => setNewDispute(prev => ({ ...prev, description: e.target.value }))}
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm resize-none"
+                      rows={4}
+                      placeholder="Describe the dispute..."
+                    />
+                  </div>
+                </div>
+
+                {/* Document Upload */}
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Upload Dispute Documents</label>
+                    <div
+                      className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
+                        dragActive 
+                          ? 'border-blue-400 bg-blue-50' 
+                          : 'border-gray-300 hover:border-gray-400'
+                      }`}
+                      onDragEnter={handleDisputeDrag}
+                      onDragLeave={handleDisputeDrag}
+                      onDragOver={handleDisputeDrag}
+                      onDrop={handleDisputeDrop}
+                    >
+                      <UploadIcon size={32} className="mx-auto text-gray-400 mb-2" />
+                      <p className="text-sm text-gray-600 mb-1">Drop dispute letters here or click to browse</p>
+                      <p className="text-xs text-gray-500">PDF, DOC, DOCX up to 10MB</p>
+                      <input
+                        type="file"
+                        multiple
+                        accept=".pdf,.doc,.docx"
+                        onChange={(e) => e.target.files && handleDisputeFileUpload(e.target.files)}
+                        className="hidden"
+                        id="dispute-file-upload"
+                      />
+                      <label
+                        htmlFor="dispute-file-upload"
+                        className="mt-3 inline-block px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 cursor-pointer"
+                      >
+                        Choose Files
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Uploaded Documents */}
+                  {newDispute.documents.length > 0 && (
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-700 mb-2">Uploaded Documents</h4>
+                      <div className="space-y-2">
+                        {newDispute.documents.map((doc) => (
+                          <div key={doc.id} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                            <div className="flex items-center space-x-2">
+                              <FileIcon size={14} className="text-blue-600" />
+                              <span className="text-sm text-gray-700">{doc.name}</span>
+                              <span className={`px-2 py-1 text-xs rounded-full ${
+                                doc.status === 'analyzed' 
+                                  ? 'bg-green-100 text-green-800' 
+                                  : 'bg-yellow-100 text-yellow-800'
+                              }`}>
+                                {doc.status === 'analyzed' ? 'Analyzed' : 'Analyzing...'}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex justify-end space-x-3 mt-6 pt-4 border-t border-gray-200">
+                <button
+                  onClick={() => {
+                    setShowNewDisputeModal(false);
+                    setNewDispute({ title: '', contract: '', type: '', description: '', documents: [] });
+                  }}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleCreateDispute}
+                  disabled={!newDispute.title || !newDispute.contract || !newDispute.type}
+                  className={`px-4 py-2 text-sm font-medium rounded-lg ${
+                    !newDispute.title || !newDispute.contract || !newDispute.type
+                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                      : 'bg-blue-600 text-white hover:bg-blue-700'
+                  }`}
+                >
+                  Create Dispute
                 </button>
               </div>
             </div>
           </div>
-          <div className="col-span-1 space-y-4">
-            <div className="border border-gray-200 rounded-lg p-3">
-              <h4 className="text-xs font-medium text-gray-700 mb-2">
-                Dispute Timeline
-              </h4>
-              <div className="space-y-3">
-                <div className="flex items-start">
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center">
-                      <div className="h-6 w-6 rounded-full bg-purple-100 flex items-center justify-center text-purple-600">
-                        <MessageSquareTextIcon size={12} />
-                      </div>
-                      <p className="ml-2 text-xs font-medium text-gray-900">
-                        Claim Received
-                      </p>
-                    </div>
-                    <p className="mt-0.5 ml-8 text-xs text-gray-500">
-                      Dec 5, 2023
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-start">
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center">
-                      <div className="h-6 w-6 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
-                        <FileTextIcon size={12} />
-                      </div>
-                      <p className="ml-2 text-xs font-medium text-gray-900">
-                        Response Drafted
-                      </p>
-                    </div>
-                    <p className="mt-0.5 ml-8 text-xs text-gray-500">
-                      Dec 7, 2023
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-start">
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center">
-                      <div className="h-6 w-6 rounded-full bg-gray-100 flex items-center justify-center text-gray-400">
-                        <CheckIcon size={12} />
-                      </div>
-                      <p className="ml-2 text-xs font-medium text-gray-400">
-                        Response Sent
-                      </p>
-                    </div>
-                    <p className="mt-0.5 ml-8 text-xs text-gray-400">Pending</p>
-                  </div>
-                </div>
-                <div className="flex items-start">
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center">
-                      <div className="h-6 w-6 rounded-full bg-gray-100 flex items-center justify-center text-gray-400">
-                        <CheckIcon size={12} />
-                      </div>
-                      <p className="ml-2 text-xs font-medium text-gray-400">
-                        Resolution
-                      </p>
-                    </div>
-                    <p className="mt-0.5 ml-8 text-xs text-gray-400">Pending</p>
-                  </div>
-                </div>
+        </div>
+      )}
+
+      {/* Document Analysis Modal */}
+      {showDocumentAnalysis && selectedDocument && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-lg font-medium text-gray-900">Document Analysis: {selectedDocument.name}</h2>
+                <button 
+                  onClick={() => {
+                    setShowDocumentAnalysis(false);
+                    setSelectedDocument(null);
+                  }}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <XIcon size={24} />
+                </button>
               </div>
-            </div>
-            <div className="border border-gray-200 rounded-lg p-3">
-              <h4 className="text-xs font-medium text-gray-700 mb-2">
-                Contract Clauses
-              </h4>
-              <div className="space-y-2">
-                <div className="bg-gray-50 p-2 rounded">
-                  <p className="text-xs font-medium text-gray-800">
-                    Clause 8.4(d)
-                  </p>
-                  <p className="text-xs text-gray-600">
-                    Unforeseeable shortages in the availability of personnel or
-                    Goods caused by epidemic or governmental actions (limited to
-                    30 days maximum extension)
-                  </p>
+
+              <div className="grid grid-cols-2 gap-6">
+                {/* Document Info */}
+                <div className="space-y-4">
+                  <div className="border border-gray-200 rounded-lg p-4">
+                    <h3 className="text-sm font-medium text-gray-800 mb-3">Document Information</h3>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Name:</span>
+                        <span className="font-medium">{selectedDocument.name}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Type:</span>
+                        <span className="font-medium">{selectedDocument.type}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Upload Date:</span>
+                        <span className="font-medium">{selectedDocument.uploadDate}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Status:</span>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          selectedDocument.status === 'analyzed' 
+                            ? 'bg-green-100 text-green-800' 
+                            : 'bg-yellow-100 text-yellow-800'
+                        }`}>
+                          {selectedDocument.status === 'analyzed' ? 'Analyzed' : 'Analyzing...'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* AI Analysis */}
+                  {selectedDocument.aiAnalysis && (
+                    <div className="border border-gray-200 rounded-lg p-4">
+                      <h3 className="text-sm font-medium text-gray-800 mb-3">AI Analysis</h3>
+                      <div className="space-y-3">
+                        <div>
+                          <h4 className="text-xs font-medium text-gray-700 mb-1">Summary:</h4>
+                          <p className="text-xs text-gray-600">{selectedDocument.aiAnalysis.summary}</p>
+                        </div>
+                        <div>
+                          <h4 className="text-xs font-medium text-gray-700 mb-2">Key Points:</h4>
+                          <ul className="space-y-1">
+                            {selectedDocument.aiAnalysis.keyPoints.map((point, index) => (
+                              <li key={index} className="text-xs text-gray-600 flex items-start">
+                                <span className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-1.5 mr-2 flex-shrink-0"></span>
+                                {point}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
-                <div className="bg-gray-50 p-2 rounded">
-                  <p className="text-xs font-medium text-gray-800">
-                    Clause 20.1
-                  </p>
-                  <p className="text-xs text-gray-600">
-                    Contractor's Claims procedure and notice requirements
-                  </p>
+
+                {/* Response Actions */}
+                <div className="space-y-4">
+                  <div className="border border-gray-200 rounded-lg p-4">
+                    <h3 className="text-sm font-medium text-gray-800 mb-3">Suggested Actions</h3>
+                    <div className="space-y-3">
+                      <button className="w-full px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 flex items-center justify-center">
+                        <EditIcon size={16} className="mr-2" />
+                        Generate Response Draft
+                      </button>
+                      <button className="w-full px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center justify-center">
+                        <MessageSquareTextIcon size={16} className="mr-2" />
+                        Request Clarification
+                      </button>
+                      <button className="w-full px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center justify-center">
+                        <CalendarIcon size={16} className="mr-2" />
+                        Schedule Meeting
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Sample Response Draft */}
+                  {selectedDocument.aiAnalysis?.suggestedResponse === 'partial_approval' && (
+                    <div className="border border-gray-200 rounded-lg p-4">
+                      <h3 className="text-sm font-medium text-gray-800 mb-3">AI-Generated Response Draft</h3>
+                      <div className="bg-gray-50 p-3 rounded-lg text-xs text-gray-700 space-y-2">
+                        <p><strong>Subject:</strong> Re: {selectedDocument.name}</p>
+                        <p><strong>Date:</strong> {new Date().toLocaleDateString()}</p>
+                        <br />
+                        <p>Dear [Contractor Representative],</p>
+                        <br />
+                        <p>We acknowledge receipt of your dispute letter dated {selectedDocument.uploadDate} regarding {selectedDocument.name}.</p>
+                        <br />
+                        <p>After careful review of the documentation provided, we would like to address the following points:</p>
+                        <br />
+                        <p>1. [AI-generated response based on document analysis]</p>
+                        <p>2. [Specific action items or clarifications needed]</p>
+                        <p>3. [Timeline and next steps]</p>
+                        <br />
+                        <p>We look forward to your prompt response and continued collaboration.</p>
+                        <br />
+                        <p>Sincerely,</p>
+                        <p>[Your Name]</p>
+                        <p>[Your Title]</p>
+                      </div>
+                      <div className="flex justify-end mt-3 space-x-2">
+                        <button className="px-3 py-1 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">
+                          Edit Draft
+                        </button>
+                        <button className="px-3 py-1 text-xs font-medium text-white bg-blue-600 rounded hover:bg-blue-700">
+                          Send Response
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </div>
-            </div>
-            <div className="border border-gray-200 rounded-lg p-3">
-              <h4 className="text-xs font-medium text-gray-700 mb-2">
-                Actions
-              </h4>
-              <div className="space-y-2">
-                <button className="w-full px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-50 rounded hover:bg-blue-100">
-                  Send Response
-                </button>
-                <button className="w-full px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">
-                  Request More Information
-                </button>
-                <button className="w-full px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">
-                  Schedule Meeting
-                </button>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
+  );
 }
 function DocumentHandling() {
   // State for document handling functionality

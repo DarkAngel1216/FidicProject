@@ -57,7 +57,7 @@ const getInitialPhases = (language: string) => {
       subItems: [
         { id: 'obligation-tracker', label: isRTL ? 'متتبع الالتزامات' : 'Obligation Tracker', status: 'pending' },
         { id: 'disputes', label: isRTL ? 'إدارة النزاعات' : 'Dispute Manager', status: 'pending' },
-        { id: 'compliance', label: isRTL ? 'قوائم الامتثال' : 'Compliance Checklists', status: 'pending' },
+        { id: 'compliance', label: isRTL ? 'معالجة الوثائق' : 'Document Handling', status: 'pending' },
         { id: 'risk-monitoring', label: isRTL ? 'مراقبة المخاطر' : 'Risk Monitoring', status: 'pending' }
       ]
     },
