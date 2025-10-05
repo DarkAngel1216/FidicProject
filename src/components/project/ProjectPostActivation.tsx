@@ -1,6 +1,22 @@
-import React, { useState, useEffect } from 'react';
-import { CalendarIcon, CheckIcon, ClockIcon, AlertTriangleIcon, FileTextIcon, MessageSquareTextIcon, CheckSquareIcon, BarChart2Icon } from 'lucide-react';
+import { useState } from 'react';
+import { CalendarIcon, CheckIcon, ClockIcon, AlertTriangleIcon, FileTextIcon, MessageSquareTextIcon, CheckSquareIcon, BarChart2Icon, UploadIcon, FileIcon, EyeIcon, EditIcon, DownloadIcon, TrashIcon, PlusIcon, XIcon } from 'lucide-react';
 import { AIAssistant } from '../ai/AIAssistant';
+
+// Type definitions
+interface DocumentAnalysis {
+  summary: string;
+  keyPoints: string[];
+  suggestedResponse: string;
+}
+
+interface Document {
+  id: string;
+  name: string;
+  type: string;
+  uploadDate: string;
+  status: 'analyzing' | 'analyzed';
+  aiAnalysis: DocumentAnalysis | null;
+}
 
 interface ProjectPostActivationProps {
   projectId: string;
@@ -49,7 +65,7 @@ export function ProjectPostActivation({
             Dispute Manager
           </button>
           <button className={`px-4 py-3 text-sm font-medium ${activeTab === 'compliance' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'}`} onClick={() => handleTabClick('compliance')}>
-            Compliance Checklists
+            Document Handling
           </button>
           <button className={`px-4 py-3 text-sm font-medium ${activeTab === 'risk-monitoring' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'}`} onClick={() => handleTabClick('risk-monitoring')}>
             Risk Monitoring
@@ -60,7 +76,7 @@ export function ProjectPostActivation({
             <div className={`${showAiAssistant ? 'w-2/3' : 'w-full'}`}>
               {activeTab === 'obligation-tracker' && <ObligationTracker />}
               {activeTab === 'disputes' && <DisputeManager />}
-              {activeTab === 'compliance' && <ComplianceChecklists />}
+              {activeTab === 'compliance' && <DocumentHandling />}
               {activeTab === 'risk-monitoring' && <RiskMonitoring />}
             </div>
             {showAiAssistant && (
@@ -578,171 +594,763 @@ function DisputeManager() {
       </div>
     </div>
 }
-function ComplianceChecklists() {
-  return <div className="space-y-6">
+function DocumentHandling() {
+  // State for document handling functionality
+  const [uploadedDocuments, setUploadedDocuments] = useState<Document[]>([
+    {
+      id: '1',
+      name: 'Contractor_Letter_001.pdf',
+      type: 'Letter',
+      uploadDate: '2023-12-10',
+      status: 'analyzed' as const,
+      aiAnalysis: {
+        summary: 'Request for time extension due to material delivery delays',
+        keyPoints: [
+          'Contractor requesting 15-day extension',
+          'Cites force majeure clause 8.4(d)',
+          'References port congestion as cause',
+          'Provides supporting documentation'
+        ],
+        suggestedResponse: 'draft_available'
+      }
+    },
+    {
+      id: '2',
+      name: 'Quality_Report_December.pdf',
+      type: 'Report',
+      uploadDate: '2023-12-08',
+      status: 'analyzed' as const,
+      aiAnalysis: {
+        summary: 'Monthly quality inspection report showing compliance issues',
+        keyPoints: [
+          '3 minor non-conformities identified',
+          'All major systems compliant',
+          'Recommendations for improvement provided',
+          'Next inspection scheduled for January 15'
+        ],
+        suggestedResponse: 'review_required'
+      }
+    },
+    {
+      id: '3',
+      name: 'Payment_Request_Invoice_123.pdf',
+      type: 'Invoice',
+      uploadDate: '2023-12-05',
+      status: 'analyzing' as const,
+      aiAnalysis: null
+    }
+  ]);
+
+  const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
+  const [showResponseGenerator, setShowResponseGenerator] = useState(false);
+  const [responseType, setResponseType] = useState('acknowledgment');
+  const [responseTone, setResponseTone] = useState('professional');
+  const [customInstructions, setCustomInstructions] = useState('');
+  const [generatedResponse, setGeneratedResponse] = useState('');
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  // Handle file upload
+  const handleFileUpload = (files: FileList) => {
+    const newDocuments: Document[] = Array.from(files).map((file, index) => ({
+      id: `${Date.now()}-${index}`,
+      name: file.name,
+      type: file.type.includes('pdf') ? 'PDF' : 'Document',
+      uploadDate: new Date().toISOString().split('T')[0],
+      status: 'analyzing' as const,
+      aiAnalysis: null
+    }));
+    
+    setUploadedDocuments(prev => [...newDocuments, ...prev]);
+    setShowUploadModal(false);
+    
+    // Simulate AI analysis after 3 seconds
+    setTimeout(() => {
+      setUploadedDocuments(prev => prev.map(doc => 
+        doc.status === 'analyzing' 
+          ? {
+              ...doc,
+              status: 'analyzed' as const,
+              aiAnalysis: {
+                summary: 'AI analysis completed - document content processed and key information extracted',
+                keyPoints: [
+                  'Document type: ' + doc.type,
+                  'Key terms and clauses identified',
+                  'Action items highlighted',
+                  'Response recommendations generated'
+                ],
+                suggestedResponse: 'draft_available'
+              }
+            }
+          : doc
+      ));
+    }, 3000);
+  };
+
+  // Handle drag and drop
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handleFileUpload(e.dataTransfer.files);
+    }
+  };
+
+  // Handle response generation
+  const handleGenerateResponse = async () => {
+    if (!selectedDocument) return;
+    
+    setIsGenerating(true);
+    
+    // Simulate AI response generation
+    setTimeout(() => {
+      const responseTemplates = {
+        acknowledgment: {
+          professional: `Dear [Contractor Representative],
+
+We acknowledge receipt of your correspondence dated ${selectedDocument.uploadDate} regarding the matter outlined in ${selectedDocument.name}.
+
+After careful review of the documentation provided, we would like to address the following points:
+
+1. We understand your request for a time extension due to the circumstances described.
+2. We are currently reviewing the supporting documentation to assess the validity of the claim.
+3. We will provide a formal response within 5 business days.
+
+We appreciate your continued cooperation and look forward to resolving this matter promptly.
+
+Sincerely,
+[Your Name]
+[Your Title]`,
+          formal: `Dear Sir/Madam,
+
+This letter serves to acknowledge receipt of your communication dated ${selectedDocument?.uploadDate}, reference ${selectedDocument?.name}.
+
+We have received and are currently reviewing the documentation submitted in support of your request. Our team is conducting a thorough analysis of the circumstances and will respond in accordance with the contract terms.
+
+We will provide our formal response within the stipulated timeframe as per the contract provisions.
+
+Yours faithfully,
+[Your Name]
+[Your Title]`,
+          friendly: `Hi [Contractor Representative],
+
+Thanks for reaching out with your letter dated ${selectedDocument?.uploadDate}. We've received ${selectedDocument?.name} and are taking a look at everything you've sent over.
+
+We understand the situation you're facing and want to work with you to find a solution. Our team is reviewing the details and we'll get back to you soon with our response.
+
+Thanks for your patience and continued partnership!
+
+Best regards,
+[Your Name]
+[Your Title]`
+        },
+        clarification: {
+          professional: `Dear [Contractor Representative],
+
+Thank you for your correspondence dated ${selectedDocument?.uploadDate} regarding ${selectedDocument?.name}.
+
+To ensure we can provide you with the most accurate response, we would appreciate clarification on the following points:
+
+1. Could you provide additional details regarding the specific circumstances mentioned?
+2. Are there any supporting documents that could help us better understand the situation?
+3. What is your preferred timeline for resolution?
+
+We look forward to your response and continued collaboration.
+
+Sincerely,
+[Your Name]
+[Your Title]`,
+          formal: `Dear Sir/Madam,
+
+Reference is made to your communication dated ${selectedDocument.uploadDate}, file reference ${selectedDocument.name}.
+
+To proceed with our review, we require the following additional information:
+
+1. Detailed explanation of the circumstances
+2. Supporting documentation
+3. Proposed resolution timeline
+
+Please provide the requested information at your earliest convenience.
+
+Yours faithfully,
+[Your Name]
+[Your Title]`,
+          friendly: `Hi [Contractor Representative],
+
+Thanks for sending over ${selectedDocument?.name} on ${selectedDocument?.uploadDate}. We're looking into this and want to make sure we have all the details we need.
+
+Could you help us out with a few more specifics? We'd love to get this sorted out quickly for you.
+
+Looking forward to hearing from you!
+
+Best,
+[Your Name]
+[Your Title]`
+        },
+        rejection: {
+          professional: `Dear [Contractor Representative],
+
+We acknowledge receipt of your correspondence dated ${selectedDocument?.uploadDate} regarding ${selectedDocument?.name}.
+
+After careful review of your request and the supporting documentation, we regret to inform you that we cannot approve the request as submitted for the following reasons:
+
+1. The circumstances described do not meet the criteria outlined in the contract.
+2. Additional supporting documentation is required to substantiate the claim.
+3. The timeline proposed is not feasible given current project constraints.
+
+We encourage you to resubmit your request with the necessary documentation and revised timeline.
+
+Sincerely,
+[Your Name]
+[Your Title]`,
+          formal: `Dear Sir/Madam,
+
+Reference is made to your communication dated ${selectedDocument.uploadDate}, file reference ${selectedDocument.name}.
+
+After thorough review, we must decline your request based on the following:
+
+1. Contractual requirements not met
+2. Insufficient supporting documentation
+3. Timeline constraints
+
+Please resubmit with complete documentation.
+
+Yours faithfully,
+[Your Name]
+[Your Title]`,
+          friendly: `Hi [Contractor Representative],
+
+Thanks for reaching out about ${selectedDocument?.name}. We've looked into your request, but unfortunately we can't approve it as it stands right now.
+
+The main issues are that we need a bit more documentation and the timeline might be tight. If you could resubmit with the additional info, we'd be happy to take another look!
+
+Thanks for understanding!
+
+Best,
+[Your Name]
+[Your Title]`
+        }
+      };
+
+      let response = responseTemplates[responseType as keyof typeof responseTemplates]?.[responseTone as keyof typeof responseTemplates.acknowledgment] || responseTemplates.acknowledgment.professional;
+      
+      // Add custom instructions if provided
+      if (customInstructions.trim()) {
+        response += `\n\nAdditional Notes: ${customInstructions}`;
+      }
+
+      setGeneratedResponse(response);
+      setIsGenerating(false);
+    }, 2000);
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Header Section */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
         <h3 className="text-sm font-medium text-blue-800 mb-2">
-          Compliance Checklists
+          Document Handling & AI Analysis
         </h3>
         <p className="text-xs text-blue-700">
-          Track compliance requirements extracted from contracts and ensure all
-          deliverables are properly documented.
+          Upload contractor letters and documents. AI will analyze content, explain key points, and suggest appropriate responses.
         </p>
       </div>
-      <div className="flex space-x-4 mb-6">
-        <div className="w-1/3">
-          <label className="block text-xs font-medium text-gray-700 mb-1">
-            Contract
-          </label>
-          <select className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm">
-            <option>All Contracts</option>
-            <option>ABB Electrical Equipment</option>
-            <option>Siemens Electrical Systems</option>
-          </select>
+
+      {/* Upload Section */}
+      <div className="bg-white border border-gray-200 rounded-lg p-4">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-base font-medium text-gray-800">Upload Documents</h3>
+          <button 
+            onClick={() => setShowUploadModal(true)}
+            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 flex items-center"
+          >
+            <PlusIcon size={16} className="mr-2" />
+            Upload Document
+          </button>
         </div>
-        <div className="w-1/3">
-          <label className="block text-xs font-medium text-gray-700 mb-1">
-            Category
+
+        {/* Drag and Drop Area */}
+        <div
+          className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+            dragActive 
+              ? 'border-blue-400 bg-blue-50' 
+              : 'border-gray-300 hover:border-gray-400'
+          }`}
+          onDragEnter={handleDrag}
+          onDragLeave={handleDrag}
+          onDragOver={handleDrag}
+          onDrop={handleDrop}
+        >
+          <UploadIcon size={48} className="mx-auto text-gray-400 mb-4" />
+          <p className="text-sm text-gray-600 mb-2">
+            Drag and drop documents here, or click to browse
+          </p>
+          <p className="text-xs text-gray-500">
+            Supports PDF, DOC, DOCX files up to 10MB
+          </p>
+          <input
+            type="file"
+            multiple
+            accept=".pdf,.doc,.docx"
+            onChange={(e) => e.target.files && handleFileUpload(e.target.files)}
+            className="hidden"
+            id="file-upload"
+          />
+          <label
+            htmlFor="file-upload"
+            className="mt-4 inline-block px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 cursor-pointer"
+          >
+            Choose Files
           </label>
-          <select className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm">
-            <option>All Categories</option>
-            <option>Health & Safety</option>
-            <option>Quality Assurance</option>
-            <option>Environmental</option>
-            <option>Regulatory</option>
-          </select>
         </div>
-        <div className="w-1/3">
-          <label className="block text-xs font-medium text-gray-700 mb-1">
-            Status
-          </label>
-          <select className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm">
-            <option>All Statuses</option>
-            <option>Compliant</option>
-            <option>Non-Compliant</option>
-            <option>Pending Review</option>
-          </select>
         </div>
+
+      {/* Documents List */}
+      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+        <div className="px-4 py-3 border-b border-gray-200 bg-gray-50">
+          <h3 className="text-sm font-medium text-gray-800">Uploaded Documents</h3>
       </div>
-      <div className="space-y-4">
-        <div className="flex justify-between items-center">
-          <h3 className="text-base font-medium text-gray-800">
-            Health & Safety Compliance
-          </h3>
-          <div className="flex items-center">
-            <div className="w-24 h-2 bg-gray-200 rounded-full mr-2">
-              <div className="h-full bg-green-500 rounded-full" style={{ width: '80%' }}></div>
-            </div>
-            <span className="text-xs font-medium text-green-600">
-              80% Complete
+        <div className="divide-y divide-gray-200">
+          {uploadedDocuments.map((doc) => (
+            <div key={doc.id} className="p-4 hover:bg-gray-50">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <FileIcon size={20} className="text-blue-600" />
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-900">{doc.name}</h4>
+                    <div className="flex items-center space-x-4 text-xs text-gray-500">
+                      <span>{doc.type}</span>
+                      <span>Uploaded: {doc.uploadDate}</span>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        doc.status === 'analyzed' 
+                          ? 'bg-green-100 text-green-800' 
+                          : 'bg-yellow-100 text-yellow-800'
+                      }`}>
+                        {doc.status === 'analyzed' ? 'Analyzed' : 'Analyzing...'}
             </span>
           </div>
         </div>
-        <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-10">
-                    <input type="checkbox" className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Requirement
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Contract
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Clause Ref
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Last Updated
-                  </th>
-                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                <tr>
-                  <td className="px-4 py-3 whitespace-nowrap">
-                    <input type="checkbox" className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" defaultChecked />
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
-                    Site Safety Plan
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                    Siemens Electrical Systems
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                    4.8, 6.7
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap">
-                    <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
-                      Compliant
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                    Nov 15, 2023
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-center">
-                    <button className="text-xs text-blue-600 font-medium">
-                      View
+                </div>
+                <div className="flex items-center space-x-2">
+                  <button 
+                    onClick={() => setSelectedDocument(doc)}
+                    className="p-2 text-gray-400 hover:text-blue-600"
+                    title="View Analysis"
+                  >
+                    <EyeIcon size={16} />
                     </button>
-                  </td>
-                </tr>
-                <tr className="bg-gray-50">
-                  <td className="px-4 py-3 whitespace-nowrap">
-                    <input type="checkbox" className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" defaultChecked />
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
-                    Safety Training Records
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                    ABB Electrical Equipment
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                    6.9
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap">
-                    <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
-                      Compliant
+                  <button className="p-2 text-gray-400 hover:text-gray-600" title="Download">
+                    <DownloadIcon size={16} />
+                  </button>
+                  <button className="p-2 text-gray-400 hover:text-red-600" title="Delete">
+                    <TrashIcon size={16} />
+                  </button>
+                </div>
+              </div>
+
+              {/* AI Analysis Preview */}
+              {doc.status === 'analyzed' && doc.aiAnalysis && (
+                <div className="mt-3 p-3 bg-gray-50 rounded-lg">
+                  <h5 className="text-xs font-medium text-gray-700 mb-2">AI Analysis Summary:</h5>
+                  <p className="text-xs text-gray-600 mb-2">{doc.aiAnalysis.summary}</p>
+                  <div className="flex items-center justify-between">
+                    <div className="flex space-x-2">
+                      {doc.aiAnalysis.keyPoints.slice(0, 2).map((point, index) => (
+                        <span key={index} className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">
+                          {point}
                     </span>
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                    Nov 28, 2023
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-center">
-                    <button className="text-xs text-blue-600 font-medium">
-                      View
+                      ))}
+                    </div>
+                    <button 
+                      onClick={() => setSelectedDocument(doc)}
+                      className="text-xs text-blue-600 font-medium hover:text-blue-800"
+                    >
+                      View Full Analysis →
                     </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
           </div>
         </div>
+              )}
       </div>
-      <div className="flex justify-between items-center pt-4 border-t border-gray-200">
+          ))}
+        </div>
+      </div>
+
+      {/* Document Analysis Modal */}
+      {selectedDocument && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-lg font-medium text-gray-900">Document Analysis</h2>
+                <button 
+                  onClick={() => setSelectedDocument(null)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <XIcon size={24} />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-2 gap-6">
+                {/* Document Info */}
+                <div className="space-y-4">
+                  <div className="border border-gray-200 rounded-lg p-4">
+                    <h3 className="text-sm font-medium text-gray-800 mb-3">Document Information</h3>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Name:</span>
+                        <span className="font-medium">{selectedDocument.name}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Type:</span>
+                        <span className="font-medium">{selectedDocument.type}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Upload Date:</span>
+                        <span className="font-medium">{selectedDocument.uploadDate}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Status:</span>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          selectedDocument.status === 'analyzed' 
+                            ? 'bg-green-100 text-green-800' 
+                            : 'bg-yellow-100 text-yellow-800'
+                        }`}>
+                          {selectedDocument.status === 'analyzed' ? 'Analyzed' : 'Analyzing...'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* AI Analysis */}
+                  {selectedDocument.aiAnalysis && (
+                    <div className="border border-gray-200 rounded-lg p-4">
+                      <h3 className="text-sm font-medium text-gray-800 mb-3">AI Analysis</h3>
+                      <div className="space-y-3">
         <div>
-          <p className="text-sm text-gray-700">Overall Compliance: 75%</p>
-          <p className="text-xs text-gray-500">
-            12 of 16 requirements compliant
+                          <h4 className="text-xs font-medium text-gray-700 mb-1">Summary:</h4>
+                          <p className="text-xs text-gray-600">{selectedDocument.aiAnalysis.summary}</p>
+        </div>
+                        <div>
+                          <h4 className="text-xs font-medium text-gray-700 mb-2">Key Points:</h4>
+                          <ul className="space-y-1">
+                            {selectedDocument.aiAnalysis.keyPoints.map((point, index) => (
+                              <li key={index} className="text-xs text-gray-600 flex items-start">
+                                <span className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-1.5 mr-2 flex-shrink-0"></span>
+                                {point}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Response Actions */}
+                <div className="space-y-4">
+                  <div className="border border-gray-200 rounded-lg p-4">
+                    <h3 className="text-sm font-medium text-gray-800 mb-3">Suggested Actions</h3>
+                    <div className="space-y-3">
+                      <button 
+                        onClick={() => setShowResponseGenerator(true)}
+                        className="w-full px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 flex items-center justify-center"
+                      >
+                        <EditIcon size={16} className="mr-2" />
+                        Generate Response Draft
+                      </button>
+                      <button className="w-full px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center justify-center">
+                        <MessageSquareTextIcon size={16} className="mr-2" />
+                        Request Clarification
+                      </button>
+                      <button className="w-full px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center justify-center">
+                        <CalendarIcon size={16} className="mr-2" />
+                        Schedule Meeting
+          </button>
+        </div>
+      </div>
+
+                  {/* Sample Response Draft */}
+                  {selectedDocument.aiAnalysis?.suggestedResponse === 'draft_available' && (
+                    <div className="border border-gray-200 rounded-lg p-4">
+                      <h3 className="text-sm font-medium text-gray-800 mb-3">AI-Generated Response Draft</h3>
+                      <div className="bg-gray-50 p-3 rounded-lg text-xs text-gray-700 space-y-2">
+                        <p><strong>Subject:</strong> Re: {selectedDocument.name}</p>
+                        <p><strong>Date:</strong> {new Date().toLocaleDateString()}</p>
+                        <br />
+                        <p>Dear [Contractor Representative],</p>
+                        <br />
+                        <p>We acknowledge receipt of your correspondence dated {selectedDocument.uploadDate} regarding the matter outlined in {selectedDocument.name}.</p>
+                        <br />
+                        <p>After careful review of the documentation provided, we would like to address the following points:</p>
+                        <br />
+                        <p>1. [AI-generated response based on document analysis]</p>
+                        <p>2. [Specific action items or clarifications needed]</p>
+                        <p>3. [Timeline and next steps]</p>
+                        <br />
+                        <p>We look forward to your prompt response and continued collaboration.</p>
+                        <br />
+                        <p>Sincerely,</p>
+                        <p>[Your Name]</p>
+                        <p>[Your Title]</p>
+                      </div>
+                      <div className="flex justify-end mt-3 space-x-2">
+                        <button className="px-3 py-1 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">
+                          Edit Draft
+                        </button>
+                        <button className="px-3 py-1 text-xs font-medium text-white bg-blue-600 rounded hover:bg-blue-700">
+                          Send Response
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Upload Modal */}
+      {showUploadModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-medium text-gray-900">Upload Document</h2>
+                <button 
+                  onClick={() => setShowUploadModal(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <XIcon size={24} />
+                </button>
+              </div>
+              
+              <div className="space-y-4">
+                <div
+                  className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
+                    dragActive 
+                      ? 'border-blue-400 bg-blue-50' 
+                      : 'border-gray-300 hover:border-gray-400'
+                  }`}
+                  onDragEnter={handleDrag}
+                  onDragLeave={handleDrag}
+                  onDragOver={handleDrag}
+                  onDrop={handleDrop}
+                >
+                  <UploadIcon size={32} className="mx-auto text-gray-400 mb-2" />
+                  <p className="text-sm text-gray-600 mb-1">Drop files here or click to browse</p>
+                  <p className="text-xs text-gray-500">PDF, DOC, DOCX up to 10MB</p>
+                </div>
+                
+                <input
+                  type="file"
+                  multiple
+                  accept=".pdf,.doc,.docx"
+                  onChange={(e) => e.target.files && handleFileUpload(e.target.files)}
+                  className="hidden"
+                  id="modal-file-upload"
+                />
+                <label
+                  htmlFor="modal-file-upload"
+                  className="block w-full px-4 py-2 text-sm font-medium text-center text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 cursor-pointer"
+                >
+                  Choose Files
+          </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Response Generator Modal */}
+      {showResponseGenerator && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-lg font-medium text-gray-900">Generate Response Draft</h2>
+                <button 
+                  onClick={() => {
+                    setShowResponseGenerator(false);
+                    setGeneratedResponse('');
+                    setCustomInstructions('');
+                  }}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <XIcon size={24} />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-2 gap-6">
+                {/* Configuration Panel */}
+                <div className="space-y-4">
+                  <div className="border border-gray-200 rounded-lg p-4">
+                    <h3 className="text-sm font-medium text-gray-800 mb-3">Response Configuration</h3>
+                    
+                    {/* Response Type */}
+                    <div className="mb-4">
+                      <label className="block text-xs font-medium text-gray-700 mb-2">Response Type</label>
+                      <select 
+                        value={responseType} 
+                        onChange={(e) => setResponseType(e.target.value)}
+                        className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                      >
+                        <option value="acknowledgment">Acknowledgment</option>
+                        <option value="clarification">Request Clarification</option>
+                        <option value="rejection">Rejection</option>
+          </select>
+        </div>
+
+                    {/* Response Tone */}
+                    <div className="mb-4">
+                      <label className="block text-xs font-medium text-gray-700 mb-2">Tone</label>
+                      <select 
+                        value={responseTone} 
+                        onChange={(e) => setResponseTone(e.target.value)}
+                        className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                      >
+                        <option value="professional">Professional</option>
+                        <option value="formal">Formal</option>
+                        <option value="friendly">Friendly</option>
+          </select>
+        </div>
+
+                    {/* Custom Instructions */}
+                    <div className="mb-4">
+                      <label className="block text-xs font-medium text-gray-700 mb-2">Custom Instructions (Optional)</label>
+                      <textarea
+                        value={customInstructions}
+                        onChange={(e) => setCustomInstructions(e.target.value)}
+                        placeholder="Add any specific instructions or requirements for the response..."
+                        className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm resize-none"
+                        rows={3}
+                      />
+      </div>
+
+                    {/* Generate Button */}
+                    <button
+                      onClick={handleGenerateResponse}
+                      disabled={isGenerating}
+                      className={`w-full px-4 py-2 text-sm font-medium rounded-lg flex items-center justify-center ${
+                        isGenerating 
+                          ? 'bg-gray-400 text-white cursor-not-allowed' 
+                          : 'bg-blue-600 text-white hover:bg-blue-700'
+                      }`}
+                    >
+                      {isGenerating ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                          Generating...
+                        </>
+                      ) : (
+                        <>
+                          <EditIcon size={16} className="mr-2" />
+                          Generate Response
+                        </>
+                      )}
+                    </button>
+            </div>
+
+                  {/* Document Context */}
+                  <div className="border border-gray-200 rounded-lg p-4">
+                    <h3 className="text-sm font-medium text-gray-800 mb-3">Document Context</h3>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Document:</span>
+                        <span className="font-medium">{selectedDocument?.name}</span>
+          </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Type:</span>
+                        <span className="font-medium">{selectedDocument?.type}</span>
+        </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Date:</span>
+                        <span className="font-medium">{selectedDocument?.uploadDate}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Generated Response Panel */}
+                <div className="space-y-4">
+                  <div className="border border-gray-200 rounded-lg p-4">
+                    <div className="flex justify-between items-center mb-3">
+                      <h3 className="text-sm font-medium text-gray-800">Generated Response</h3>
+                      {generatedResponse && (
+                        <div className="flex space-x-2">
+                          <button 
+                            onClick={() => navigator.clipboard.writeText(generatedResponse)}
+                            className="px-3 py-1 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50"
+                          >
+                            Copy
+                    </button>
+                          <button 
+                            onClick={() => setGeneratedResponse('')}
+                            className="px-3 py-1 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50"
+                          >
+                            Clear
+                    </button>
+          </div>
+                      )}
+        </div>
+                    
+                    {generatedResponse ? (
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <pre className="text-xs text-gray-700 whitespace-pre-wrap font-sans">
+                          {generatedResponse}
+                        </pre>
+      </div>
+                    ) : (
+                      <div className="bg-gray-50 p-8 rounded-lg text-center">
+                        <EditIcon size={32} className="mx-auto text-gray-400 mb-2" />
+                        <p className="text-sm text-gray-500">
+                          Configure your response settings and click "Generate Response" to create a draft.
           </p>
         </div>
-        <div className="flex space-x-2">
-          <button className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
-            Generate Compliance Report
+                    )}
+                  </div>
+
+                  {/* Action Buttons */}
+                  {generatedResponse && (
+                    <div className="border border-gray-200 rounded-lg p-4">
+                      <h3 className="text-sm font-medium text-gray-800 mb-3">Actions</h3>
+                      <div className="space-y-2">
+                        <button className="w-full px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 flex items-center justify-center">
+                          <MessageSquareTextIcon size={16} className="mr-2" />
+                          Send Response
           </button>
-          <button className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">
-            Add Compliance Item
+                        <button className="w-full px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center justify-center">
+                          <DownloadIcon size={16} className="mr-2" />
+                          Save as Draft
+                        </button>
+                        <button className="w-full px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center justify-center">
+                          <EditIcon size={16} className="mr-2" />
+                          Edit Response
           </button>
         </div>
       </div>
-    </div>;
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
 function RiskMonitoring() {
   return <div className="space-y-6">
