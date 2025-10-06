@@ -545,26 +545,26 @@ function DisputeManager() {
             <tbody className="bg-white divide-y divide-gray-200">
               {disputes.map((dispute) => (
                 <tr key={dispute.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <MessageSquareTextIcon size={16} className="text-purple-600 mr-2" />
-                      <div>
-                        <div className="text-sm font-medium text-gray-900">
+                <td className="px-4 py-3 whitespace-nowrap">
+                  <div className="flex items-center">
+                    <MessageSquareTextIcon size={16} className="text-purple-600 mr-2" />
+                    <div>
+                      <div className="text-sm font-medium text-gray-900">
                           {dispute.title}
-                        </div>
-                        <div className="text-xs text-gray-500">{dispute.reference}</div>
                       </div>
+                        <div className="text-xs text-gray-500">{dispute.reference}</div>
                     </div>
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                  </div>
+                </td>
+                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
                     {dispute.contract}
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap">
-                    <span className="px-2 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-800">
+                </td>
+                <td className="px-4 py-3 whitespace-nowrap">
+                  <span className="px-2 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-800">
                       {dispute.type}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap">
+                  </span>
+                </td>
+                <td className="px-4 py-3 whitespace-nowrap">
                     <span className={`px-2 py-1 text-xs font-medium rounded-full ${
                       dispute.status === 'In Progress' ? 'bg-amber-100 text-amber-800' :
                       dispute.status === 'New' ? 'bg-blue-100 text-blue-800' :
@@ -572,15 +572,15 @@ function DisputeManager() {
                       'bg-gray-100 text-gray-800'
                     }`}>
                       {dispute.status}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                  </span>
+                </td>
+                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
                     {dispute.dateRaised}
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                </td>
+                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
                     {dispute.clauseRef}
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-center">
+                </td>
+                <td className="px-4 py-3 whitespace-nowrap text-center">
                     <button 
                       onClick={() => {
                         setSelectedDispute(dispute);
@@ -588,10 +588,10 @@ function DisputeManager() {
                       }}
                       className="text-xs text-blue-600 font-medium hover:text-blue-800"
                     >
-                      View
-                    </button>
-                  </td>
-                </tr>
+                    View
+                  </button>
+                </td>
+              </tr>
               ))}
             </tbody>
           </table>
@@ -643,9 +643,9 @@ function DisputeManager() {
                           'bg-gray-100 text-gray-800'
                         }`}>
                           {selectedDispute.status}
-                        </span>
-                      </div>
-                    </div>
+          </span>
+        </div>
+            </div>
                     <div className="mt-3">
                       <span className="text-gray-600 text-sm">Description:</span>
                       <p className="text-sm text-gray-700 mt-1">{selectedDispute.description}</p>
@@ -708,46 +708,46 @@ function DisputeManager() {
                       Based on the contract terms and the evidence provided, the following response is recommended:
                     </p>
                     <div className="bg-gray-50 p-3 rounded-lg text-xs text-gray-700 space-y-2">
-                      <p>Dear [Contractor Representative],</p>
-                      <br />
-                      <p>
+                <p>Dear [Contractor Representative],</p>
+                <br />
+                <p>
                         We acknowledge receipt of your {selectedDispute.type} claim dated {selectedDispute.dateRaised} regarding {selectedDispute.title.toLowerCase()}.
-                      </p>
-                      <br />
-                      <p>
+                </p>
+                <br />
+                <p>
                         After careful review of the documentation provided and in accordance with the relevant contract clauses, we can confirm that:
-                      </p>
-                      <br />
+                </p>
+                <br />
                       <p>1. [AI-generated response based on document analysis]</p>
                       <p>2. [Specific action items or clarifications needed]</p>
                       <p>3. [Timeline and next steps]</p>
-                      <br />
+                <br />
                       <p>We look forward to your prompt response and continued collaboration.</p>
-                      <br />
-                      <p>Sincerely,</p>
-                      <p>[Employer Representative]</p>
-                    </div>
+                <br />
+                <p>Sincerely,</p>
+                <p>[Employer Representative]</p>
+              </div>
                     <div className="flex justify-end mt-3 space-x-2">
                       <button className="px-3 py-1 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">
-                        Edit Draft
-                      </button>
+                  Edit Draft
+                </button>
                       <button className="px-3 py-1 text-xs font-medium text-white bg-blue-600 rounded hover:bg-blue-700">
                         Send Response
                       </button>
-                    </div>
-                  </div>
-                </div>
+              </div>
+            </div>
+          </div>
 
                 {/* Sidebar */}
-                <div className="col-span-1 space-y-4">
+          <div className="col-span-1 space-y-4">
                   {/* Timeline */}
                   <div className="border border-gray-200 rounded-lg p-4">
                     <h3 className="text-sm font-medium text-gray-800 mb-3">Dispute Timeline</h3>
-                    <div className="space-y-3">
+              <div className="space-y-3">
                       {selectedDispute.timeline.map((item, index) => (
                         <div key={index} className="flex items-start">
-                          <div className="min-w-0 flex-1">
-                            <div className="flex items-center">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center">
                               <div className={`h-6 w-6 rounded-full flex items-center justify-center ${
                                 item.status === 'completed' ? 'bg-green-100 text-green-600' :
                                 item.status === 'in-progress' ? 'bg-blue-100 text-blue-600' :
@@ -756,18 +756,18 @@ function DisputeManager() {
                                 {item.status === 'completed' ? <CheckIcon size={12} /> :
                                  item.status === 'in-progress' ? <ClockIcon size={12} /> :
                                  <MessageSquareTextIcon size={12} />}
-                              </div>
-                              <p className="ml-2 text-xs font-medium text-gray-900">
+                      </div>
+                      <p className="ml-2 text-xs font-medium text-gray-900">
                                 {item.step}
-                              </p>
-                            </div>
-                            <p className="mt-0.5 ml-8 text-xs text-gray-500">
-                              {item.date || 'Pending'}
-                            </p>
-                          </div>
-                        </div>
-                      ))}
+                      </p>
                     </div>
+                    <p className="mt-0.5 ml-8 text-xs text-gray-500">
+                              {item.date || 'Pending'}
+                    </p>
+                  </div>
+                </div>
+                      ))}
+                      </div>
                   </div>
 
                   {/* Contract Clauses */}
@@ -778,16 +778,16 @@ function DisputeManager() {
                         <p className="text-xs font-medium text-gray-800">Clause 8.4(d)</p>
                         <p className="text-xs text-gray-600">
                           Unforeseeable shortages in the availability of personnel or Goods caused by epidemic or governmental actions
-                        </p>
-                      </div>
+                      </p>
+                    </div>
                       <div className="bg-gray-50 p-2 rounded">
                         <p className="text-xs font-medium text-gray-800">Clause 20.1</p>
                         <p className="text-xs text-gray-600">
                           Contractor's Claims procedure and notice requirements
-                        </p>
-                      </div>
-                    </div>
+                    </p>
                   </div>
+                </div>
+                      </div>
 
                   {/* Actions */}
                   <div className="border border-gray-200 rounded-lg p-4">
@@ -808,10 +808,10 @@ function DisputeManager() {
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
-          </div>
-        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
       )}
 
       {/* New Dispute Modal */}
@@ -844,7 +844,7 @@ function DisputeManager() {
                       className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
                       placeholder="Enter dispute title"
                     />
-                  </div>
+            </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Contract</label>
@@ -858,7 +858,7 @@ function DisputeManager() {
                       <option value="ABB Electrical Equipment">ABB Electrical Equipment</option>
                       <option value="Orascom Civil Works">Orascom Civil Works</option>
                     </select>
-                  </div>
+                </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Dispute Type</label>
@@ -874,7 +874,7 @@ function DisputeManager() {
                       <option value="Payment Dispute">Payment Dispute</option>
                       <option value="Force Majeure">Force Majeure</option>
                     </select>
-                  </div>
+                </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
@@ -885,8 +885,8 @@ function DisputeManager() {
                       rows={4}
                       placeholder="Describe the dispute..."
                     />
-                  </div>
-                </div>
+              </div>
+            </div>
 
                 {/* Document Upload */}
                 <div className="space-y-4">
@@ -927,7 +927,7 @@ function DisputeManager() {
                   {newDispute.documents.length > 0 && (
                     <div>
                       <h4 className="text-sm font-medium text-gray-700 mb-2">Uploaded Documents</h4>
-                      <div className="space-y-2">
+              <div className="space-y-2">
                         {newDispute.documents.map((doc) => (
                           <div key={doc.id} className="flex items-center justify-between p-2 bg-gray-50 rounded">
                             <div className="flex items-center space-x-2">
@@ -1065,10 +1065,10 @@ function DisputeManager() {
                       </button>
                       <button className="w-full px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center justify-center">
                         <CalendarIcon size={16} className="mr-2" />
-                        Schedule Meeting
-                      </button>
-                    </div>
-                  </div>
+                  Schedule Meeting
+                </button>
+              </div>
+            </div>
 
                   {/* Sample Response Draft */}
                   {selectedDocument.aiAnalysis?.suggestedResponse === 'partial_approval' && (
@@ -1093,7 +1093,7 @@ function DisputeManager() {
                         <p>Sincerely,</p>
                         <p>[Your Name]</p>
                         <p>[Your Title]</p>
-                      </div>
+          </div>
                       <div className="flex justify-end mt-3 space-x-2">
                         <button className="px-3 py-1 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">
                           Edit Draft
@@ -1101,10 +1101,10 @@ function DisputeManager() {
                         <button className="px-3 py-1 text-xs font-medium text-white bg-blue-600 rounded hover:bg-blue-700">
                           Send Response
                         </button>
-                      </div>
-                    </div>
+        </div>
+      </div>
                   )}
-                </div>
+    </div>
               </div>
             </div>
           </div>
@@ -1164,11 +1164,18 @@ function DocumentHandling() {
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const [showResponseGenerator, setShowResponseGenerator] = useState(false);
-  const [responseType, setResponseType] = useState('acknowledgment');
-  const [responseTone, setResponseTone] = useState('professional');
-  const [customInstructions, setCustomInstructions] = useState('');
-  const [generatedResponse, setGeneratedResponse] = useState('');
-  const [isGenerating, setIsGenerating] = useState(false);
+  
+  // Chat-based response generation state
+  const [chatMessages, setChatMessages] = useState<Array<{
+    id: string;
+    role: 'user' | 'assistant';
+    content: string;
+    timestamp: Date;
+  }>>([]);
+  const [chatInput, setChatInput] = useState('');
+  const [isChatGenerating, setIsChatGenerating] = useState(false);
+  const [finalDraft, setFinalDraft] = useState('');
+  const [showFinalDraft, setShowFinalDraft] = useState(false);
 
   // Handle file upload
   const handleFileUpload = (files: FileList) => {
@@ -1229,55 +1236,71 @@ function DocumentHandling() {
   };
 
   // Handle response generation
-  const handleGenerateResponse = async () => {
-    if (!selectedDocument) return;
-    
-    setIsGenerating(true);
-    
-    // Simulate AI response generation
-    setTimeout(() => {
-      const responseTemplates = {
-        acknowledgment: {
-          professional: `Dear [Contractor Representative],
 
-We acknowledge receipt of your correspondence dated ${selectedDocument.uploadDate} regarding the matter outlined in ${selectedDocument.name}.
+  // Initialize chat for response generation
+  const initializeResponseChat = () => {
+    const initialMessage = {
+      id: '1',
+      role: 'assistant' as const,
+      content: `Hello! I'm here to help you create a response to ${selectedDocument?.name}. 
+
+I can help you:
+- Analyze the document content
+- Generate different response types (acknowledgment, clarification, rejection)
+- Adjust the tone (professional, formal, friendly)
+- Incorporate specific requirements
+
+What type of response would you like to create?`,
+      timestamp: new Date()
+    };
+    
+    setChatMessages([initialMessage]);
+    setShowResponseGenerator(true);
+  };
+
+  // Handle chat message sending
+  const handleChatSend = async () => {
+    if (!chatInput.trim() || isChatGenerating) return;
+
+    const userMessage = {
+      id: Date.now().toString(),
+      role: 'user' as const,
+      content: chatInput,
+      timestamp: new Date()
+    };
+
+    setChatMessages(prev => [...prev, userMessage]);
+    setChatInput('');
+    setIsChatGenerating(true);
+
+    // Simulate AI response
+    setTimeout(() => {
+      let aiResponse = '';
+      
+      // Generate contextual responses based on user input
+      if (chatInput.toLowerCase().includes('acknowledgment') || chatInput.toLowerCase().includes('acknowledge')) {
+        aiResponse = `I'll help you create an acknowledgment response. Based on the document analysis, here's a draft:
+
+**Draft Response:**
+Dear [Contractor Representative],
+
+We acknowledge receipt of your correspondence dated ${selectedDocument?.uploadDate} regarding ${selectedDocument?.name}.
 
 After careful review of the documentation provided, we would like to address the following points:
 
-1. We understand your request for a time extension due to the circumstances described.
-2. We are currently reviewing the supporting documentation to assess the validity of the claim.
-3. We will provide a formal response within 5 business days.
-
-We appreciate your continued cooperation and look forward to resolving this matter promptly.
+1. We understand your request and are currently reviewing the supporting documentation.
+2. We will provide a formal response within 5 business days.
+3. We appreciate your continued cooperation.
 
 Sincerely,
 [Your Name]
-[Your Title]`,
-          formal: `Dear Sir/Madam,
 
-This letter serves to acknowledge receipt of your communication dated ${selectedDocument?.uploadDate}, reference ${selectedDocument?.name}.
+Would you like me to modify anything in this response?`;
+      } else if (chatInput.toLowerCase().includes('clarification') || chatInput.toLowerCase().includes('clarify')) {
+        aiResponse = `I'll help you create a clarification request. Here's a draft:
 
-We have received and are currently reviewing the documentation submitted in support of your request. Our team is conducting a thorough analysis of the circumstances and will respond in accordance with the contract terms.
-
-We will provide our formal response within the stipulated timeframe as per the contract provisions.
-
-Yours faithfully,
-[Your Name]
-[Your Title]`,
-          friendly: `Hi [Contractor Representative],
-
-Thanks for reaching out with your letter dated ${selectedDocument?.uploadDate}. We've received ${selectedDocument?.name} and are taking a look at everything you've sent over.
-
-We understand the situation you're facing and want to work with you to find a solution. Our team is reviewing the details and we'll get back to you soon with our response.
-
-Thanks for your patience and continued partnership!
-
-Best regards,
-[Your Name]
-[Your Title]`
-        },
-        clarification: {
-          professional: `Dear [Contractor Representative],
+**Draft Response:**
+Dear [Contractor Representative],
 
 Thank you for your correspondence dated ${selectedDocument?.uploadDate} regarding ${selectedDocument?.name}.
 
@@ -1287,40 +1310,17 @@ To ensure we can provide you with the most accurate response, we would appreciat
 2. Are there any supporting documents that could help us better understand the situation?
 3. What is your preferred timeline for resolution?
 
-We look forward to your response and continued collaboration.
+We look forward to your response.
 
 Sincerely,
 [Your Name]
-[Your Title]`,
-          formal: `Dear Sir/Madam,
 
-Reference is made to your communication dated ${selectedDocument.uploadDate}, file reference ${selectedDocument.name}.
+What specific clarifications would you like to request?`;
+      } else if (chatInput.toLowerCase().includes('rejection') || chatInput.toLowerCase().includes('reject')) {
+        aiResponse = `I'll help you create a rejection response. Here's a draft:
 
-To proceed with our review, we require the following additional information:
-
-1. Detailed explanation of the circumstances
-2. Supporting documentation
-3. Proposed resolution timeline
-
-Please provide the requested information at your earliest convenience.
-
-Yours faithfully,
-[Your Name]
-[Your Title]`,
-          friendly: `Hi [Contractor Representative],
-
-Thanks for sending over ${selectedDocument?.name} on ${selectedDocument?.uploadDate}. We're looking into this and want to make sure we have all the details we need.
-
-Could you help us out with a few more specifics? We'd love to get this sorted out quickly for you.
-
-Looking forward to hearing from you!
-
-Best,
-[Your Name]
-[Your Title]`
-        },
-        rejection: {
-          professional: `Dear [Contractor Representative],
+**Draft Response:**
+Dear [Contractor Representative],
 
 We acknowledge receipt of your correspondence dated ${selectedDocument?.uploadDate} regarding ${selectedDocument?.name}.
 
@@ -1330,50 +1330,65 @@ After careful review of your request and the supporting documentation, we regret
 2. Additional supporting documentation is required to substantiate the claim.
 3. The timeline proposed is not feasible given current project constraints.
 
-We encourage you to resubmit your request with the necessary documentation and revised timeline.
+We encourage you to resubmit your request with the necessary documentation.
 
 Sincerely,
 [Your Name]
-[Your Title]`,
-          formal: `Dear Sir/Madam,
 
-Reference is made to your communication dated ${selectedDocument.uploadDate}, file reference ${selectedDocument.name}.
+Would you like to specify the exact reasons for rejection?`;
+      } else if (chatInput.toLowerCase().includes('tone') || chatInput.toLowerCase().includes('formal') || chatInput.toLowerCase().includes('friendly')) {
+        aiResponse = `I can adjust the tone of the response. Here are the options:
 
-After thorough review, we must decline your request based on the following:
+**Professional Tone:** Business-like, respectful, clear
+**Formal Tone:** Very structured, traditional business language
+**Friendly Tone:** Conversational, warm, collaborative
 
-1. Contractual requirements not met
-2. Insufficient supporting documentation
-3. Timeline constraints
+Which tone would you prefer? I can rewrite the response accordingly.`;
+      } else if (chatInput.toLowerCase().includes('final') || chatInput.toLowerCase().includes('approve') || chatInput.toLowerCase().includes('done')) {
+        aiResponse = `Perfect! I've prepared the final draft for your approval. 
 
-Please resubmit with complete documentation.
+**Final Response Draft:**
+${chatMessages[chatMessages.length - 1]?.content || 'Based on our conversation, here is the final response...'}
 
-Yours faithfully,
-[Your Name]
-[Your Title]`,
-          friendly: `Hi [Contractor Representative],
+Please review this draft carefully. You can:
+- Approve and send the response
+- Request further modifications
+- Save as draft for later
 
-Thanks for reaching out about ${selectedDocument?.name}. We've looked into your request, but unfortunately we can't approve it as it stands right now.
+Would you like to approve this final draft?`;
+        setFinalDraft(chatMessages[chatMessages.length - 1]?.content || 'Final response draft');
+        setShowFinalDraft(true);
+      } else {
+        aiResponse = `I understand you'd like to ${chatInput.toLowerCase()}. Let me help you with that.
 
-The main issues are that we need a bit more documentation and the timeline might be tight. If you could resubmit with the additional info, we'd be happy to take another look!
+Could you please be more specific about what you'd like me to do? For example:
+- "Make it more formal"
+- "Add a specific clause reference"
+- "Include a timeline"
+- "Change the tone to friendly"
 
-Thanks for understanding!
-
-Best,
-[Your Name]
-[Your Title]`
-        }
-      };
-
-      let response = responseTemplates[responseType as keyof typeof responseTemplates]?.[responseTone as keyof typeof responseTemplates.acknowledgment] || responseTemplates.acknowledgment.professional;
-      
-      // Add custom instructions if provided
-      if (customInstructions.trim()) {
-        response += `\n\nAdditional Notes: ${customInstructions}`;
+What would you like me to modify or add to the response?`;
       }
 
-      setGeneratedResponse(response);
-      setIsGenerating(false);
-    }, 2000);
+      const assistantMessage = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant' as const,
+        content: aiResponse,
+        timestamp: new Date()
+      };
+
+      setChatMessages(prev => [...prev, assistantMessage]);
+      setIsChatGenerating(false);
+    }, 1500);
+  };
+
+  // Handle final draft approval
+  const handleApproveDraft = () => {
+    setShowFinalDraft(false);
+    setShowResponseGenerator(false);
+    // Reset chat for next time
+    setChatMessages([]);
+    setFinalDraft('');
   };
 
   return (
@@ -1548,7 +1563,7 @@ Best,
                             : 'bg-yellow-100 text-yellow-800'
                         }`}>
                           {selectedDocument.status === 'analyzed' ? 'Analyzed' : 'Analyzing...'}
-                        </span>
+                    </span>
                       </div>
                     </div>
                   </div>
@@ -1584,12 +1599,12 @@ Best,
                     <h3 className="text-sm font-medium text-gray-800 mb-3">Suggested Actions</h3>
                     <div className="space-y-3">
                       <button 
-                        onClick={() => setShowResponseGenerator(true)}
+                        onClick={initializeResponseChat}
                         className="w-full px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 flex items-center justify-center"
                       >
-                        <EditIcon size={16} className="mr-2" />
-                        Generate Response Draft
-                      </button>
+                        <MessageSquareTextIcon size={16} className="mr-2" />
+                        Chat with AI to Generate Response
+                    </button>
                       <button className="w-full px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center justify-center">
                         <MessageSquareTextIcon size={16} className="mr-2" />
                         Request Clarification
@@ -1598,8 +1613,8 @@ Best,
                         <CalendarIcon size={16} className="mr-2" />
                         Schedule Meeting
           </button>
+          </div>
         </div>
-      </div>
 
                   {/* Sample Response Draft */}
                   {selectedDocument.aiAnalysis?.suggestedResponse === 'draft_available' && (
@@ -1624,7 +1639,7 @@ Best,
                         <p>Sincerely,</p>
                         <p>[Your Name]</p>
                         <p>[Your Title]</p>
-                      </div>
+      </div>
                       <div className="flex justify-end mt-3 space-x-2">
                         <button className="px-3 py-1 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">
                           Edit Draft
@@ -1694,174 +1709,185 @@ Best,
         </div>
       )}
 
-      {/* Response Generator Modal */}
+      {/* Chat-based Response Generator Modal */}
       {showResponseGenerator && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-lg font-medium text-gray-900">Generate Response Draft</h2>
-                <button 
-                  onClick={() => {
-                    setShowResponseGenerator(false);
-                    setGeneratedResponse('');
-                    setCustomInstructions('');
-                  }}
-                  className="text-gray-400 hover:text-gray-600"
-                >
-                  <XIcon size={24} />
-                </button>
+          <div className="bg-white rounded-lg shadow-xl max-w-5xl w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col">
+            {/* Header */}
+            <div className="flex justify-between items-center p-6 border-b border-gray-200">
+        <div>
+                <h2 className="text-lg font-medium text-gray-900">AI Response Assistant</h2>
+                <p className="text-sm text-gray-500">Chat with AI to create the perfect response to {selectedDocument?.name}</p>
               </div>
-
-              <div className="grid grid-cols-2 gap-6">
-                {/* Configuration Panel */}
-                <div className="space-y-4">
-                  <div className="border border-gray-200 rounded-lg p-4">
-                    <h3 className="text-sm font-medium text-gray-800 mb-3">Response Configuration</h3>
-                    
-                    {/* Response Type */}
-                    <div className="mb-4">
-                      <label className="block text-xs font-medium text-gray-700 mb-2">Response Type</label>
-                      <select 
-                        value={responseType} 
-                        onChange={(e) => setResponseType(e.target.value)}
-                        className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
-                      >
-                        <option value="acknowledgment">Acknowledgment</option>
-                        <option value="clarification">Request Clarification</option>
-                        <option value="rejection">Rejection</option>
-          </select>
-        </div>
-
-                    {/* Response Tone */}
-                    <div className="mb-4">
-                      <label className="block text-xs font-medium text-gray-700 mb-2">Tone</label>
-                      <select 
-                        value={responseTone} 
-                        onChange={(e) => setResponseTone(e.target.value)}
-                        className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
-                      >
-                        <option value="professional">Professional</option>
-                        <option value="formal">Formal</option>
-                        <option value="friendly">Friendly</option>
-          </select>
-        </div>
-
-                    {/* Custom Instructions */}
-                    <div className="mb-4">
-                      <label className="block text-xs font-medium text-gray-700 mb-2">Custom Instructions (Optional)</label>
-                      <textarea
-                        value={customInstructions}
-                        onChange={(e) => setCustomInstructions(e.target.value)}
-                        placeholder="Add any specific instructions or requirements for the response..."
-                        className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm resize-none"
-                        rows={3}
-                      />
-      </div>
-
-                    {/* Generate Button */}
-                    <button
-                      onClick={handleGenerateResponse}
-                      disabled={isGenerating}
-                      className={`w-full px-4 py-2 text-sm font-medium rounded-lg flex items-center justify-center ${
-                        isGenerating 
-                          ? 'bg-gray-400 text-white cursor-not-allowed' 
-                          : 'bg-blue-600 text-white hover:bg-blue-700'
-                      }`}
-                    >
-                      {isGenerating ? (
-                        <>
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                          Generating...
-                        </>
-                      ) : (
-                        <>
-                          <EditIcon size={16} className="mr-2" />
-                          Generate Response
-                        </>
-                      )}
-                    </button>
+              <button 
+                onClick={() => {
+                  setShowResponseGenerator(false);
+                  setChatMessages([]);
+                  setChatInput('');
+                  setFinalDraft('');
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <XIcon size={24} />
+              </button>
             </div>
 
-                  {/* Document Context */}
-                  <div className="border border-gray-200 rounded-lg p-4">
-                    <h3 className="text-sm font-medium text-gray-800 mb-3">Document Context</h3>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Document:</span>
-                        <span className="font-medium">{selectedDocument?.name}</span>
-          </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Type:</span>
-                        <span className="font-medium">{selectedDocument?.type}</span>
+            {/* Chat Messages */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50">
+              {chatMessages.map((message) => (
+                <div key={message.id} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                  <div className={`max-w-[80%] rounded-lg p-4 ${
+                    message.role === 'user' 
+                      ? 'bg-blue-600 text-white' 
+                      : 'bg-white border border-gray-200 shadow-sm'
+                  }`}>
+                    <div className="flex items-start space-x-3">
+                      {message.role === 'assistant' && (
+                        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                          <MessageSquareTextIcon size={16} className="text-blue-600" />
+                        </div>
+                      )}
+                      <div className="flex-1">
+                        <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                        <p className={`text-xs mt-2 ${
+                          message.role === 'user' ? 'text-blue-100' : 'text-gray-500'
+                        }`}>
+                          {message.timestamp.toLocaleTimeString()}
+          </p>
         </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Date:</span>
-                        <span className="font-medium">{selectedDocument?.uploadDate}</span>
+                      {message.role === 'user' && (
+                        <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+                          <span className="text-white text-sm font-medium">U</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+              
+              {/* Typing indicator */}
+              {isChatGenerating && (
+                <div className="flex justify-start">
+                  <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                        <MessageSquareTextIcon size={16} className="text-blue-600" />
+                      </div>
+                      <div className="flex space-x-1">
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                       </div>
                     </div>
                   </div>
                 </div>
+              )}
+            </div>
 
-                {/* Generated Response Panel */}
-                <div className="space-y-4">
-                  <div className="border border-gray-200 rounded-lg p-4">
-                    <div className="flex justify-between items-center mb-3">
-                      <h3 className="text-sm font-medium text-gray-800">Generated Response</h3>
-                      {generatedResponse && (
-                        <div className="flex space-x-2">
-                          <button 
-                            onClick={() => navigator.clipboard.writeText(generatedResponse)}
-                            className="px-3 py-1 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50"
-                          >
-                            Copy
-                    </button>
-                          <button 
-                            onClick={() => setGeneratedResponse('')}
-                            className="px-3 py-1 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50"
-                          >
-                            Clear
-                    </button>
-          </div>
-                      )}
-        </div>
-                    
-                    {generatedResponse ? (
-                      <div className="bg-gray-50 p-4 rounded-lg">
-                        <pre className="text-xs text-gray-700 whitespace-pre-wrap font-sans">
-                          {generatedResponse}
-                        </pre>
-      </div>
-                    ) : (
-                      <div className="bg-gray-50 p-8 rounded-lg text-center">
-                        <EditIcon size={32} className="mx-auto text-gray-400 mb-2" />
-                        <p className="text-sm text-gray-500">
-                          Configure your response settings and click "Generate Response" to create a draft.
-          </p>
-        </div>
-                    )}
-                  </div>
-
-                  {/* Action Buttons */}
-                  {generatedResponse && (
-                    <div className="border border-gray-200 rounded-lg p-4">
-                      <h3 className="text-sm font-medium text-gray-800 mb-3">Actions</h3>
-                      <div className="space-y-2">
-                        <button className="w-full px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 flex items-center justify-center">
-                          <MessageSquareTextIcon size={16} className="mr-2" />
-                          Send Response
-          </button>
-                        <button className="w-full px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center justify-center">
-                          <DownloadIcon size={16} className="mr-2" />
-                          Save as Draft
-                        </button>
-                        <button className="w-full px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center justify-center">
-                          <EditIcon size={16} className="mr-2" />
-                          Edit Response
-          </button>
-        </div>
-      </div>
+            {/* Chat Input */}
+            <div className="p-6 border-t border-gray-200 bg-white">
+              <div className="flex space-x-3">
+                <div className="flex-1">
+                  <textarea
+                    value={chatInput}
+                    onChange={(e) => setChatInput(e.target.value)}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        handleChatSend();
+                      }
+                    }}
+                    placeholder="Type your message here... (e.g., 'Create an acknowledgment response' or 'Make it more formal')"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    rows={2}
+                    disabled={isChatGenerating}
+                  />
+                </div>
+                <button
+                  onClick={handleChatSend}
+                  disabled={!chatInput.trim() || isChatGenerating}
+                  className={`px-6 py-3 text-sm font-medium rounded-lg flex items-center ${
+                    !chatInput.trim() || isChatGenerating
+                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                      : 'bg-blue-600 text-white hover:bg-blue-700'
+                  }`}
+                >
+                  {isChatGenerating ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  ) : (
+                    <MessageSquareTextIcon size={16} />
                   )}
+          </button>
+              </div>
+              <div className="mt-2 text-xs text-gray-500">
+                Press Enter to send, Shift+Enter for new line
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Final Draft Approval Modal */}
+      {showFinalDraft && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-lg font-medium text-gray-900">Final Draft Approval</h2>
+                <button 
+                  onClick={() => setShowFinalDraft(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <XIcon size={24} />
+          </button>
+        </div>
+
+              <div className="space-y-6">
+                {/* Final Draft */}
+                <div className="border border-gray-200 rounded-lg p-4">
+                  <h3 className="text-sm font-medium text-gray-800 mb-3">Final Response Draft</h3>
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <pre className="text-sm text-gray-700 whitespace-pre-wrap font-sans">
+                      {finalDraft}
+                    </pre>
+      </div>
+                </div>
+
+                {/* Approval Actions */}
+                <div className="flex justify-between items-center pt-4 border-t border-gray-200">
+                  <div className="flex space-x-3">
+                    <button
+                      onClick={() => setShowFinalDraft(false)}
+                      className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                    >
+                      Request Changes
+                    </button>
+                    <button
+                      onClick={() => navigator.clipboard.writeText(finalDraft)}
+                      className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                    >
+                      Copy Draft
+                    </button>
+                  </div>
+                  <div className="flex space-x-3">
+                    <button
+                      onClick={() => {
+                        setShowFinalDraft(false);
+                        setShowResponseGenerator(false);
+                        setChatMessages([]);
+                        setFinalDraft('');
+                      }}
+                      className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                    >
+                      Save as Draft
+                    </button>
+                    <button
+                      onClick={handleApproveDraft}
+                      className="px-6 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700"
+                    >
+                      Approve & Send
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
