@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-PROJECT_CONF="FidicProject.conf"
+SOURCE_CONF="nginx.conf"
+TARGET_CONF="FidicProject.conf"
 SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TARGET_DIR="${NGINX_CONF_DIR:-/etc/nginx/conf.d}"
-TARGET_PATH="${TARGET_DIR}/${PROJECT_CONF}"
+TARGET_PATH="${TARGET_DIR}/${TARGET_CONF}"
 
-if [[ ! -f "${SOURCE_DIR}/${PROJECT_CONF}" ]]; then
-    echo "Expected ${PROJECT_CONF} next to this script, but it was not found." >&2
+if [[ ! -f "${SOURCE_DIR}/${SOURCE_CONF}" ]]; then
+    echo "Expected ${SOURCE_CONF} next to this script, but it was not found." >&2
     exit 1
 fi
 
@@ -16,7 +17,12 @@ if [[ ! -d "${TARGET_DIR}" ]]; then
     exit 1
 fi
 
-# Use install to copy with proper permissions in one step.
-sudo install -m 644 "${SOURCE_DIR}/${PROJECT_CONF}" "${TARGET_PATH}"
+# Copy the nginx.conf to the target location with the project name
+sudo cp "${SOURCE_DIR}/${SOURCE_CONF}" "${TARGET_PATH}"
+sudo chmod 644 "${TARGET_PATH}"
 
-echo "Nginx config copied to ${TARGET_PATH}."
+echo "Nginx config copied from ${SOURCE_CONF} to ${TARGET_PATH}."
+echo "Reloading nginx..."
+sudo nginx -t && sudo nginx -s reload
+
+echo "Done! Nginx reloaded successfully."
