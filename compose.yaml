@@ -8,13 +8,12 @@
 # database or a cache. For examples, see the Awesome Compose repository:
 # https://github.com/docker/awesome-compose
 services:
-  server:
+  fidic-client:
     build:
       context: .
     environment:
       NODE_ENV: production
-    ports:
-      - 3001:3001
+    network_mode: host
     deploy:
       resources:
         limits:
