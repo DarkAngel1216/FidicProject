@@ -70,4 +70,4 @@ EXPOSE 3001
 
 # Run the application.
 # CMD npm run
-CMD npx vite preview --host 0.0.0.0 --port 3001
+CMD npx vite preview --host 0.0.0.0 --port 3002
