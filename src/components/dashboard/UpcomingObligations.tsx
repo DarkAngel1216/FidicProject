@@ -43,40 +43,40 @@ export function UpcomingObligations() {
   };
 
   const ObligationItem = ({ obligation }) => (
-    <div key={obligation.id} className={`p-3 rounded-lg border ${obligation.status === 'Overdue' ? 'border-red-200 bg-red-50' : 'border-gray-200 bg-white'}`}>
-        <div className="flex justify-between items-start">
-          <div>
-            <h3 className="text-sm font-medium text-gray-900">
-              {obligation.title}
-            </h3>
-            <p className="text-xs text-gray-500">{obligation.contract}</p>
-          </div>
-          <span className={`px-2 py-1 text-xs font-medium rounded-full ${obligation.type === 'Payment' ? 'bg-blue-100 text-blue-800' : obligation.type === 'Delivery' ? 'bg-purple-100 text-purple-800' : obligation.type === 'Legal' ? 'bg-amber-100 text-amber-800' : 'bg-green-100 text-green-800'}`}>
-            {obligation.type}
-          </span>
+    <div key={obligation.id} className={`p-3 rounded-lg border ${obligation.status === 'Overdue' ? 'border-red-200 bg-red-50 dark:bg-red-900/10 dark:border-red-900/30' : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'}`}>
+      <div className="flex justify-between items-start">
+        <div>
+          <h3 className="text-sm font-medium text-gray-900 dark:text-gray-200">
+            {obligation.title}
+          </h3>
+          <p className="text-xs text-gray-500 dark:text-gray-400">{obligation.contract}</p>
         </div>
-        <div className="mt-2 flex items-center text-xs">
-          <CalendarIcon size={14} className={obligation.status === 'Overdue' ? 'text-red-500 mr-1' : 'text-gray-400 mr-1'} />
-          <span className={obligation.status === 'Overdue' ? 'text-red-500 font-medium' : 'text-gray-500'}>
-            {formatDate(obligation.dueDate)}
-            {obligation.status === 'Overdue' ? ' (Overdue)' : ''}
-          </span>
-        </div>
+        <span className={`px-2 py-1 text-xs font-medium rounded-full ${obligation.type === 'Payment' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300' : obligation.type === 'Delivery' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300' : obligation.type === 'Legal' ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300' : 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'}`}>
+          {obligation.type}
+        </span>
       </div>
+      <div className="mt-2 flex items-center text-xs">
+        <CalendarIcon size={14} className={obligation.status === 'Overdue' ? 'text-red-500 mr-1' : 'text-gray-400 dark:text-gray-500 mr-1'} />
+        <span className={obligation.status === 'Overdue' ? 'text-red-500 font-medium' : 'text-gray-500 dark:text-gray-400'}>
+          {formatDate(obligation.dueDate)}
+          {obligation.status === 'Overdue' ? ' (Overdue)' : ''}
+        </span>
+      </div>
+    </div>
   )
 
   return <div className="space-y-4">
-      <div>
-        <h3 className="text-sm font-medium text-gray-500 mb-2">Overdue</h3>
-        <div className="space-y-3">
-          {overdueObligations.map(obligation => <ObligationItem key={obligation.id} obligation={obligation} />)}
-        </div>
-      </div>
-      <div>
-        <h3 className="text-sm font-medium text-gray-500 mb-2">Upcoming</h3>
-        <div className="space-y-3">
-          {upcomingObligations.map(obligation => <ObligationItem key={obligation.id} obligation={obligation} />)}
-        </div>
+    <div>
+      <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Overdue</h3>
+      <div className="space-y-3">
+        {overdueObligations.map(obligation => <ObligationItem key={obligation.id} obligation={obligation} />)}
       </div>
     </div>
+    <div>
+      <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Upcoming</h3>
+      <div className="space-y-3">
+        {upcomingObligations.map(obligation => <ObligationItem key={obligation.id} obligation={obligation} />)}
+      </div>
+    </div>
+  </div>
 }

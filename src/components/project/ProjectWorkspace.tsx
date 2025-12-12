@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { ProjectNavigation } from './ProjectNavigation';
-import { ProjectDashboard } from './ProjectDashboard';
 import { ProjectOverview } from './ProjectOverview';
 import { ProjectPreActivation } from './ProjectPreActivation';
 import { ProjectActivation } from './ProjectActivation';
@@ -121,7 +120,7 @@ export function ProjectWorkspace({
 
     switch (mainPhase) {
       case 'overview':
-        return <ProjectDashboard projectId={projectId} language={language} />;
+        return <ProjectOverview projectId={projectId} language={language} setCurrentPhase={setCurrentPhase} />;
       case 'pre-activation':
         return <ProjectPreActivation projectId={projectId} language={language} subPhase={subPhase} onActivate={() => setCurrentPhase('activation')} setCurrentPhase={setCurrentPhase} />;
       case 'activation':
@@ -129,13 +128,13 @@ export function ProjectWorkspace({
       case 'post-activation':
         return <ProjectPostActivation projectId={projectId} language={language} subPhase={subPhase} setCurrentPhase={setCurrentPhase} />;
       case 'reports':
-        return <ProjectReports projectId={projectId} language={language} />;
+        return <ProjectReports projectId={projectId} />;
       default:
-        return <ProjectOverview projectId={projectId} projectName={projectName} language={language} />;
+        return <ProjectOverview projectId={projectId} />;
     }
   };
-  return <div className={`flex flex-1 overflow-hidden ${direction === 'rtl' ? 'flex-row-reverse' : ''}`}>
-      <ProjectNavigation currentPhase={currentPhase} setCurrentPhase={setCurrentPhase} projectName={projectName} region={region} country={country} language={language} projectStatus={projectStatus} phases={phases} setPhases={setPhases} />
-      <div className="flex-1 overflow-y-auto p-4">{renderPhaseContent()}</div>
-    </div>
+  return <div className={`flex flex-1 overflow-hidden bg-gray-50 dark:bg-gray-900 ${direction === 'rtl' ? 'flex-row-reverse' : ''}`}>
+    <ProjectNavigation currentPhase={currentPhase} setCurrentPhase={setCurrentPhase} projectName={projectName} region={region} country={country} language={language} projectStatus={projectStatus} phases={phases} setPhases={setPhases} />
+    <div className="flex-1 overflow-y-auto p-4 bg-gray-50 dark:bg-gray-900">{renderPhaseContent()}</div>
+  </div>
 }

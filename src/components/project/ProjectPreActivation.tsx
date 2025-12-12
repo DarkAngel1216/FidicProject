@@ -57,25 +57,25 @@ export function ProjectPreActivation({
   };
   return (
     <div className="p-6">
-      
+
       {/* Tab Navigation */}
-      <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden mb-6">
-        <div className="flex border-b border-gray-200 overflow-x-auto">
-          <button className={`px-4 py-3 text-sm font-medium whitespace-nowrap flex items-center ${activeTab === 'contract-drafting' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'}`} onClick={() => handleTabClick('contract-drafting')}>
+      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden mb-6">
+        <div className="flex border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
+          <button className={`px-4 py-3 text-sm font-medium whitespace-nowrap flex items-center ${activeTab === 'contract-drafting' ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`} onClick={() => handleTabClick('contract-drafting')}>
             {getTabStatusIndicator('contract-drafting')}
-            {isRTL ? 'صياغة العقد' : 'Contract Drafting'}
+            <span className="ml-2">{isRTL ? 'صياغة العقد' : 'Contract Drafting'}</span>
           </button>
-          <button className={`px-4 py-3 text-sm font-medium whitespace-nowrap flex items-center ${activeTab === 'drafting-approval' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'}`} onClick={() => handleTabClick('drafting-approval')}>
+          <button className={`px-4 py-3 text-sm font-medium whitespace-nowrap flex items-center ${activeTab === 'drafting-approval' ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`} onClick={() => handleTabClick('drafting-approval')}>
             {getTabStatusIndicator('drafting-approval')}
-            {isRTL ? 'موافقة الصياغة' : 'Drafting Approval'}
+            <span className="ml-2">{isRTL ? 'موافقة الصياغة' : 'Drafting Approval'}</span>
           </button>
-          <button className={`px-4 py-3 text-sm font-medium whitespace-nowrap flex items-center ${activeTab === 'upload-contracts' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'}`} onClick={() => handleTabClick('upload-contracts')}>
+          <button className={`px-4 py-3 text-sm font-medium whitespace-nowrap flex items-center ${activeTab === 'upload-contracts' ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`} onClick={() => handleTabClick('upload-contracts')}>
             {getTabStatusIndicator('upload-contracts')}
-            {isRTL ? 'تحميل العقود' : 'Upload Contracts'}
+            <span className="ml-2">{isRTL ? 'تحميل العقود' : 'Upload Contracts'}</span>
           </button>
-          <button className={`px-4 py-3 text-sm font-medium whitespace-nowrap flex items-center ${activeTab === 'contract-comparison' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'}`} onClick={() => handleTabClick('contract-comparison')}>
+          <button className={`px-4 py-3 text-sm font-medium whitespace-nowrap flex items-center ${activeTab === 'contract-comparison' ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`} onClick={() => handleTabClick('contract-comparison')}>
             {getTabStatusIndicator('contract-comparison')}
-            {isRTL ? 'مقارنة العقود' : 'Contract Comparison'}
+            <span className="ml-2">{isRTL ? 'مقارنة العقود' : 'Contract Comparison'}</span>
           </button>
         </div>
       </div>

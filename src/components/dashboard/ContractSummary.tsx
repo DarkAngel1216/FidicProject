@@ -75,43 +75,43 @@ export function ContractSummary() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'Active':
-        return <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
-            Active
-          </span>;
+        return <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
+          Active
+        </span>;
       case 'Draft':
-        return <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800">
-            Draft
-          </span>;
+        return <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+          Draft
+        </span>;
       case 'Review':
-        return <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
-            Review
-          </span>;
+        return <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+          Review
+        </span>;
       default:
-        return <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800">
-            {status}
-          </span>;
+        return <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+          {status}
+        </span>;
     }
   };
   const getRiskBadge = (score: number) => {
     if (score <= 3) {
-      return <span className="flex items-center text-green-600">
-          <CheckCircleIcon size={16} className="mr-1" /> Low
-        </span>;
+      return <span className="flex items-center text-green-600 dark:text-green-400">
+        <CheckCircleIcon size={16} className="mr-1" /> Low
+      </span>;
     }
     if (score <= 6) {
-      return <span className="flex items-center text-amber-600">
-          <ClockIcon size={16} className="mr-1" /> Medium
-        </span>;
-    }
-    return <span className="flex items-center text-red-600">
-        <AlertCircleIcon size={16} className="mr-1" /> High
+      return <span className="flex items-center text-amber-600 dark:text-amber-400">
+        <ClockIcon size={16} className="mr-1" /> Medium
       </span>;
+    }
+    return <span className="flex items-center text-red-600 dark:text-red-400">
+      <AlertCircleIcon size={16} className="mr-1" /> High
+    </span>;
   };
 
   const SortableHeader = ({ children, name }) => {
     const isSorted = sortConfig.key === name;
     return (
-      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onClick={() => requestSort(name)}>
+      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-700 dark:hover:text-gray-200" onClick={() => requestSort(name)}>
         <div className="flex items-center">
           {children}
           {isSorted ? (
@@ -124,7 +124,7 @@ export function ContractSummary() {
 
   return <div>
     <div className="overflow-x-auto">
-      <table className="min-w-full divide-y divide-gray-200">
+      <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
         <thead>
           <tr>
             <SortableHeader name="name">Contract</SortableHeader>
@@ -135,49 +135,49 @@ export function ContractSummary() {
             <SortableHeader name="lastUpdated">Updated</SortableHeader>
           </tr>
         </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
-          {paginatedContracts.map(contract => <tr key={contract.id} className="hover:bg-gray-50">
-              <td className="px-4 py-3 whitespace-nowrap">
-                <div className="flex items-center">
-                  <FileTextIcon size={16} className="text-gray-500 mr-2" />
-                  <div>
-                    <div className="text-sm font-medium text-gray-900">
-                      {contract.name}
-                    </div>
-                    <div className="text-xs text-gray-500">{contract.id}</div>
+        <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+          {paginatedContracts.map(contract => <tr key={contract.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+            <td className="px-4 py-3 whitespace-nowrap">
+              <div className="flex items-center">
+                <FileTextIcon size={16} className="text-gray-500 dark:text-gray-400 mr-2" />
+                <div>
+                  <div className="text-sm font-medium text-gray-900 dark:text-white">
+                    {contract.name}
                   </div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">{contract.id}</div>
                 </div>
-              </td>
-              <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                {contract.project}
-              </td>
-              <td className="px-4 py-3 whitespace-nowrap">
-                {getStatusBadge(contract.status)}
-              </td>
-              <td className="px-4 py-3 whitespace-nowrap text-sm">
-                {getRiskBadge(contract.riskScore)}
-              </td>
-              <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                {contract.phase}
-              </td>
-              <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                {contract.lastUpdated}
-              </td>
-            </tr>)}
+              </div>
+            </td>
+            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+              {contract.project}
+            </td>
+            <td className="px-4 py-3 whitespace-nowrap">
+              {getStatusBadge(contract.status)}
+            </td>
+            <td className="px-4 py-3 whitespace-nowrap text-sm">
+              {getRiskBadge(contract.riskScore)}
+            </td>
+            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+              {contract.phase}
+            </td>
+            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+              {contract.lastUpdated}
+            </td>
+          </tr>)}
         </tbody>
       </table>
     </div>
     <div className="flex justify-between items-center mt-4">
       <div>
-        <p className="text-sm text-gray-700">
+        <p className="text-sm text-gray-700 dark:text-gray-300">
           Showing <span className="font-medium">{paginatedContracts.length}</span> of <span className="font-medium">{contractsData.length}</span> results
         </p>
       </div>
       <div className="flex space-x-2">
-        <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="px-3 py-1 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50">
+        <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="px-3 py-1 text-sm font-medium text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50">
           Previous
         </button>
-        <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="px-3 py-1 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50">
+        <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="px-3 py-1 text-sm font-medium text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50">
           Next
         </button>
       </div>

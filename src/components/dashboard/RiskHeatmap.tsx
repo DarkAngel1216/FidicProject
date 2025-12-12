@@ -53,44 +53,44 @@ export function RiskHeatmap() {
     return 'bg-red-200 text-red-800';
   };
   return <div className="overflow-x-auto">
-      <table className="min-w-full">
-        <thead>
-          <tr>
-            <th className="px-4 py-2 text-left text-sm font-medium text-gray-500">
-              Project
-            </th>
-            {riskCategories.map(category => <th key={category} className="px-4 py-2 text-center text-sm font-medium text-gray-500">
-                {category}
-              </th>)}
-            <th className="px-4 py-2 text-center text-sm font-medium text-gray-500">
-              Overall
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {riskData.map((projectData, index) => {
+    <table className="min-w-full">
+      <thead>
+        <tr>
+          <th className="px-4 py-2 text-left text-sm font-medium text-gray-500 dark:text-gray-400">
+            Project
+          </th>
+          {riskCategories.map(category => <th key={category} className="px-4 py-2 text-center text-sm font-medium text-gray-500 dark:text-gray-400">
+            {category}
+          </th>)}
+          <th className="px-4 py-2 text-center text-sm font-medium text-gray-500 dark:text-gray-400">
+            Overall
+          </th>
+        </tr>
+      </thead>
+      <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+        {riskData.map((projectData, index) => {
           const overallScore = Math.round(projectData.risks.reduce((sum, risk) => sum + risk.score, 0) / projectData.risks.length);
-          return <tr key={index} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
-                <td className="px-4 py-3 text-sm font-medium text-gray-800">
-                  {projectData.project}
-                </td>
-                {projectData.risks.map((risk, riskIndex) => <td key={riskIndex} className="px-4 py-3 text-center">
-                    <div className="flex justify-center">
-                      <div className={`w-8 h-8 rounded-full ${getRiskColor(risk.score)} flex items-center justify-center text-white text-sm font-medium`}>
-                        {risk.score}
-                      </div>
-                    </div>
-                  </td>)}
-                <td className="px-4 py-3 text-center">
-                  <div className="flex justify-center">
-                    <div className={`w-8 h-8 rounded-full ${getRiskColor(overallScore)} flex items-center justify-center text-white text-sm font-medium`}>
-                      {overallScore}
-                    </div>
-                  </div>
-                </td>
-              </tr>
+          return <tr key={index} className={index % 2 === 0 ? 'bg-gray-50 dark:bg-gray-800/50' : 'bg-white dark:bg-gray-800'}>
+            <td className="px-4 py-3 text-sm font-medium text-gray-800 dark:text-gray-200">
+              {projectData.project}
+            </td>
+            {projectData.risks.map((risk, riskIndex) => <td key={riskIndex} className="px-4 py-3 text-center">
+              <div className="flex justify-center">
+                <div className={`w-8 h-8 rounded-full ${getRiskColor(risk.score)} flex items-center justify-center text-white text-sm font-medium shadow-sm`}>
+                  {risk.score}
+                </div>
+              </div>
+            </td>)}
+            <td className="px-4 py-3 text-center">
+              <div className="flex justify-center">
+                <div className={`w-8 h-8 rounded-full ${getRiskColor(overallScore)} flex items-center justify-center text-white text-sm font-medium shadow-sm`}>
+                  {overallScore}
+                </div>
+              </div>
+            </td>
+          </tr>
         })}
-        </tbody>
-      </table>
-    </div>
+      </tbody>
+    </table>
+  </div>
 }

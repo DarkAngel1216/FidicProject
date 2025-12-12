@@ -1,36 +1,67 @@
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import { StandardTemplates } from './StandardTemplates';
 import { CustomTemplates } from './CustomTemplates';
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
+
+const itemVariants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: {
+      type: "spring" as const,
+      stiffness: 100
+    }
+  }
+};
 
 export function ContractManagement() {
   const [activeTab, setActiveTab] = useState('Standard');
 
   return (
-    <div className="space-y-6 p-4 bg-gray-100">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-800">Contract Management</h1>
-      </div>
+    <motion.div
+      className="space-y-8 p-6 bg-gray-50 dark:bg-gray-900 min-h-screen"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+    >
+      <motion.div variants={itemVariants} className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">Contract Management</h1>
+          <p className="text-gray-500 dark:text-gray-400 mt-1">Manage standard FIDIC templates and organization-specific contracts.</p>
+        </div>
+      </motion.div>
 
-      <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-        <div className="flex border-b border-gray-200">
+      <motion.div variants={itemVariants} className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
+        <div className="flex border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-700/30 p-2 gap-2">
           <button
-            className={`px-4 py-3 text-sm font-medium flex-1 text-center ${activeTab === 'Standard' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+            className={`px-6 py-2.5 text-sm font-medium flex-1 text-center rounded-xl transition-all ${activeTab === 'Standard' ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-sm ring-1 ring-gray-100 dark:ring-gray-700' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700'}`}
             onClick={() => setActiveTab('Standard')}
           >
             Standard Templates
           </button>
           <button
-            className={`px-4 py-3 text-sm font-medium flex-1 text-center ${activeTab === 'Custom' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+            className={`px-6 py-2.5 text-sm font-medium flex-1 text-center rounded-xl transition-all ${activeTab === 'Custom' ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-sm ring-1 ring-gray-100 dark:ring-gray-700' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700'}`}
             onClick={() => setActiveTab('Custom')}
           >
             Custom Templates
           </button>
         </div>
-        <div className="p-4">
+        <div className="p-6">
           {activeTab === 'Standard' && <StandardTemplates />}
           {activeTab === 'Custom' && <CustomTemplates />}
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

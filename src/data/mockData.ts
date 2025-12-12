@@ -33,7 +33,7 @@ export interface Obligation {
   dueDate: string;
   status: 'Open' | 'Closed' | 'Overdue';
   projectId: string;
-  type: 'Payment' | 'Delivery' | 'Testing' | 'Legal' | 'Other';
+  type: 'Payment' | 'Delivery' | 'Testing' | 'Legal' | 'Reporting' | 'Compliance' | 'Other';
   clauseReference: string;
   assignedTo: string; // TeamMember name
 }
@@ -78,12 +78,26 @@ export interface SubProject {
 }
 
 export interface ComplianceItem {
-    id: string;
-    requirement: string;
-    category: 'Health & Safety' | 'Quality Assurance' | 'Environmental' | 'Regulatory';
-    status: 'Compliant' | 'Non-Compliant' | 'Pending Review';
-    lastUpdated: string;
-    clauseReference: string;
+  id: string;
+  requirement: string;
+  category: 'Health & Safety' | 'Quality Assurance' | 'Environmental' | 'Regulatory';
+  status: 'Compliant' | 'Non-Compliant' | 'Pending Review';
+  lastUpdated: string;
+  clauseReference: string;
+}
+
+export interface FinancialPhase {
+  name: string;
+  budget: number;
+  actual: number;
+}
+
+export interface TimelineEvent {
+  id: string;
+  title: string;
+  date: string;
+  status: 'completed' | 'active' | 'pending';
+  icon: 'file' | 'check' | 'clock' | 'alert';
 }
 
 export interface Project {
@@ -106,6 +120,8 @@ export interface Project {
   obligationsCount: number;
   approvalsCount: number;
   reviewsCount: number;
+  financials: FinancialPhase[];
+  timeline: TimelineEvent[];
   subProjects: SubProject[];
   team: TeamMember[];
   obligations: Obligation[];
@@ -155,6 +171,20 @@ export const mockData: Region[] = [
             obligationsCount: 8,
             approvalsCount: 5,
             reviewsCount: 5,
+            financials: [
+              { name: 'Phase 1: Design', budget: 15000000, actual: 14500000 },
+              { name: 'Phase 2: Excavation', budget: 35000000, actual: 38000000 },
+              { name: 'Phase 3: Construction', budget: 50000000, actual: 25000000 },
+              { name: 'Phase 4: Systems', budget: 20000000, actual: 500000 },
+            ],
+            timeline: [
+              { id: 'ev-1', title: 'Project Initiation', date: 'Jan 15, 2022', status: 'completed', icon: 'file' },
+              { id: 'ev-2', title: 'Design Approval', date: 'Aug 20, 2022', status: 'completed', icon: 'check' },
+              { id: 'ev-3', title: 'Excavation Start', date: 'Nov 01, 2022', status: 'completed', icon: 'clock' },
+              { id: 'ev-4', title: 'Tunnel Boring Complete', date: 'May 15, 2024', status: 'active', icon: 'clock' },
+              { id: 'ev-5', title: 'Systems Installation', date: 'Feb 10, 2025', status: 'pending', icon: 'clock' },
+              { id: 'ev-6', title: 'Final Handover', date: 'Dec 31, 2025', status: 'pending', icon: 'check' },
+            ],
             subProjects: [
               {
                 id: 'subproject-1-1',

@@ -4,6 +4,14 @@
 @import 'tailwindcss/utilities';
 @import 'react-resizable/css/styles.css';
 
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply font-sans text-gray-900 bg-background antialiased;
+}
+
 .react-resizable-handle-s {
   bottom: -5px !important;
   left: 50% !important;
@@ -14,4 +22,66 @@
   border-radius: 4px !important;
   cursor: ns-resize !important;
 }
+
 /* DO NOT DELETE THESE TAILWIND IMPORTS, OTHERWISE THE STYLING WILL NOT RENDER AT ALL */
+
+/* React Big Calendar Dark Mode Overrides */
+.dark .rbc-calendar {
+  color: #e5e7eb;
+}
+
+.dark .rbc-toolbar button {
+  color: #e5e7eb;
+  border-color: #374151;
+}
+
+.dark .rbc-toolbar button:hover {
+  background-color: #374151;
+}
+
+.dark .rbc-toolbar button.rbc-active {
+  background-color: #1f2937;
+  color: #fff;
+}
+
+.dark .rbc-toolbar button.rbc-active:hover {
+  background-color: #111827;
+}
+
+.dark .rbc-off-range-bg {
+  background-color: #1f2937;
+}
+
+.dark .rbc-off-range {
+  color: #4b5563;
+}
+
+.dark .rbc-header {
+  border-bottom: 1px solid #374151;
+}
+
+.dark .rbc-month-view,
+.dark .rbc-time-view,
+.dark .rbc-agenda-view {
+  border: 1px solid #374151;
+}
+
+.dark .rbc-day-bg+.rbc-day-bg {
+  border-left: 1px solid #374151;
+}
+
+.dark .rbc-month-row+.rbc-month-row {
+  border-top: 1px solid #374151;
+}
+
+.dark .rbc-day-slot .rbc-time-slot {
+  border-top: 1px solid #374151;
+}
+
+.dark .rbc-today {
+  background-color: rgba(59, 130, 246, 0.1);
+}
+
+.dark .rbc-event {
+  background-color: #2563eb;
+}
