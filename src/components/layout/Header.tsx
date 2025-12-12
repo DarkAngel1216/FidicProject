@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
-import { BellIcon, SearchIcon, GlobeIcon, ChevronDownIcon, UserIcon, HelpCircleIcon, MoonIcon, SunIcon } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { BellIcon, SearchIcon, GlobeIcon, ChevronDownIcon, UserIcon, HelpCircleIcon, MoonIcon, SunIcon, LogOutIcon } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
+import { useAuth } from '../../contexts/AuthContext';
 
 export function Header({
   onLanguageChange
 }) {
   const { theme, toggleTheme } = useTheme();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [language, setLanguage] = useState('english');
   const [isLanguageMenuOpen, setIsLanguageMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -26,6 +30,21 @@ export function Header({
     if (onLanguageChange) {
       onLanguageChange(lang);
     }
+  };
+
+  const handleSignOut = () => {
+    setIsUserMenuOpen(false);
+    logout();
+  };
+
+  // Get user initials for avatar
+  const getUserInitials = () => {
+    if (!user) return 'U';
+    const names = user.name.split(' ');
+    if (names.length >= 2) {
+      return `${names[0][0]}${names[1][0]}`.toUpperCase();
+    }
+    return user.name.substring(0, 2).toUpperCase();
   };
 
   return (
@@ -85,19 +104,28 @@ export function Header({
         <div className="relative">
           <button className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700" onClick={toggleUserMenu}>
             <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-medium">
-              JD
+              {getUserInitials()}
             </div>
             <ChevronDownIcon size={16} className="text-gray-500" />
           </button>
           {isUserMenuOpen && (
             <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-10">
               <div className="p-3 border-b border-gray-200 dark:border-gray-700">
-                <p className="text-sm font-medium text-gray-900 dark:text-white">John Doe</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">john.doe@example.com</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-white">{user?.name || 'User'}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{user?.email || 'user@example.com'}</p>
+                {user?.role && (
+                  <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">{user.role}</p>
+                )}
               </div>
               <ul className="py-1">
                 <li>
-                  <button className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center">
+                  <button
+                    onClick={() => {
+                      setIsUserMenuOpen(false);
+                      navigate('/settings');
+                    }}
+                    className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center"
+                  >
                     <UserIcon size={16} className="mr-2 text-gray-500" />
                     Profile Settings
                   </button>
@@ -111,7 +139,11 @@ export function Header({
                   </button>
                 </li>
                 <li className="border-t border-gray-200 dark:border-gray-700 mt-1">
-                  <button className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/50">
+                  <button
+                    onClick={handleSignOut}
+                    className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/50 flex items-center"
+                  >
+                    <LogOutIcon size={16} className="mr-2" />
                     Sign Out
                   </button>
                 </li>

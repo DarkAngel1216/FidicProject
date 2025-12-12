@@ -28,7 +28,7 @@ function AppContent() {
         {showSidebar && <Sidebar language={language} />}
         <div className="flex flex-col flex-1 overflow-hidden">
           <Header onLanguageChange={handleLanguageChange} />
-          <main className="flex-1 overflow-y-auto bg-white">
+          <main className="flex-1 overflow-y-auto bg-white dark:bg-gray-900 transition-colors duration-200">
             <Outlet />
           </main>
           <Footer language={language} />

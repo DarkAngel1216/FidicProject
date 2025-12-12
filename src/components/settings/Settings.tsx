@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { UserIcon, GlobeIcon, BellIcon, LockIcon, DatabaseIcon, ServerIcon, SaveIcon, PlusIcon } from 'lucide-react';
+import { UserIcon, GlobeIcon, BellIcon, LockIcon, DatabaseIcon, ServerIcon, SaveIcon, PlusIcon, MailIcon, UserCircleIcon, CheckCircleIcon } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -25,14 +26,40 @@ const itemVariants = {
 };
 
 export function Settings() {
-  const [activeTab, setActiveTab] = useState('regions');
+  const { user, updateProfile } = useAuth();
+  const [activeTab, setActiveTab] = useState('account');
   const [loading, setLoading] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+
+  // Account form state
+  const [formData, setFormData] = useState({
+    name: user?.name || '',
+    email: user?.email || '',
+    role: user?.role || '',
+  });
 
   const handleSave = () => {
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
       alert('Settings saved successfully!');
+    }, 1000);
+  };
+
+  const handleAccountSave = () => {
+    setLoading(true);
+    setSaveSuccess(false);
+
+    // Update profile in AuthContext
+    updateProfile({
+      name: formData.name,
+      email: formData.email,
+    });
+
+    setTimeout(() => {
+      setLoading(false);
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3000);
     }, 1000);
   };
 
@@ -47,6 +74,108 @@ export function Settings() {
 
   const renderContent = () => {
     switch (activeTab) {
+      case 'account':
+        return (
+          <motion.div key="account" variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
+            <motion.div variants={itemVariants} className="space-y-4">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white">Account Settings</h3>
+                {saveSuccess && (
+                  <div className="flex items-center text-green-600 dark:text-green-400 text-sm font-medium">
+                    <CheckCircleIcon size={16} className="mr-1" />
+                    Saved successfully!
+                  </div>
+                )}
+              </div>
+
+              <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl p-6 shadow-sm">
+                <div className="space-y-6">
+                  {/* Profile Picture */}
+                  <div className="flex items-center space-x-6">
+                    <div className="w-20 h-20 rounded-full bg-blue-600 flex items-center justify-center text-white text-2xl font-bold">
+                      {user?.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-900 dark:text-white">Profile Picture</h4>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">JPG, GIF or PNG. Max size of 2MB</p>
+                      <button className="mt-2 px-3 py-1.5 text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors">
+                        Upload Photo
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Name Field */}
+                  <div>
+                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      <UserCircleIcon size={16} className="inline mr-1" />
+                      Full Name
+                    </label>
+                    <input
+                      id="name"
+                      type="text"
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Enter your full name"
+                    />
+                  </div>
+
+                  {/* Email Field */}
+                  <div>
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      <MailIcon size={16} className="inline mr-1" />
+                      Email Address
+                    </label>
+                    <input
+                      id="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Enter your email"
+                    />
+                  </div>
+
+                  {/* Role Field (Read-only) */}
+                  <div>
+                    <label htmlFor="role" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Role
+                    </label>
+                    <input
+                      id="role"
+                      type="text"
+                      value={formData.role}
+                      disabled
+                      className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-100 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 cursor-not-allowed"
+                    />
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Contact your administrator to change your role</p>
+                  </div>
+
+                  {/* Save Button */}
+                  <div className="flex justify-end pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <button
+                      onClick={handleAccountSave}
+                      disabled={loading}
+                      className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center font-medium transition-colors"
+                    >
+                      {loading ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                          Saving...
+                        </>
+                      ) : (
+                        <>
+                          <SaveIcon size={16} className="mr-2" />
+                          Save Changes
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        );
       case 'regions':
         return (
           <motion.div key="regions" variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">

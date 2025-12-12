@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { GlobeIcon, MapPinIcon, BuildingIcon, FolderIcon, FileTextIcon, PlusIcon, ChevronDownIcon, ChevronRightIcon, SearchIcon, FilterIcon, AlertTriangleIcon, CheckCircleIcon, ClockIcon } from 'lucide-react';
+import { GlobeIcon, MapPinIcon, BuildingIcon, FolderIcon, FileTextIcon, PlusIcon, ChevronDownIcon, ChevronRightIcon, SearchIcon, FilterIcon, AlertTriangleIcon, CheckCircleIcon, ClockIcon, ArrowRightIcon } from 'lucide-react';
 import { mockData, findProjectById, Project, Region, Country, SubProject, Contract, Obligation, Risk, Dispute, TeamMember } from '../../data/mockData';
 
 interface RegionsProjectsProps {
@@ -30,6 +31,7 @@ const itemVariants = {
 };
 
 export function RegionsProjects({ onProjectSelect }: RegionsProjectsProps) {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
   const [selectedProjectId, setSelectedProjectId] = useState<string>('project-1'); // Default to Cairo Metro Line 3
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set(['region-me', 'country-egypt', 'project-1']));
@@ -39,6 +41,10 @@ export function RegionsProjects({ onProjectSelect }: RegionsProjectsProps) {
 
   const handleProjectSelect = (projectId: string, projectName: string, region: string, country: string) => {
     setSelectedProjectId(projectId);
+
+    // Navigate to project workspace
+    navigate(`/project/${projectId}`);
+
     if (onProjectSelect) {
       onProjectSelect(projectId, projectName, region, country);
     }
@@ -250,11 +256,16 @@ function ProjectTree({ data, onProjectSelect, selectedProjectId, expandedNodes, 
           isLeaf={isLeaf}
           active={isActive}
           isExpanded={isExpanded}
+          onToggle={() => toggleExpand(node.id)}
           onClick={() => {
-            if (node.projects || node.subProjects || node.contracts) { // Only projects and subprojects are selectable
+            // Navigate only if it's a project or sub-project (not region or country)
+            const isProject = node.subProjects !== undefined; // Has subProjects = is a project
+            const isSubProject = node.contracts !== undefined && !node.projects; // Has contracts but not projects = is a sub-project
+
+            if (isProject || isSubProject) {
               onProjectSelect(node.id, node.name, node.region, node.country);
             }
-            toggleExpand(node.id);
+            // Note: toggleExpand is now handled by onToggle, not here
           }}
         >
           {children}
@@ -275,9 +286,15 @@ interface TreeNodeProps {
   isLeaf?: boolean;
   isExpanded: boolean;
   onClick: () => void;
+  onToggle: () => void; // Separate handler for expand/collapse
 }
 
-function TreeNode({ label, icon, children, level = 0, active = false, isLeaf = false, isExpanded, onClick }: TreeNodeProps) {
+function TreeNode({ label, icon, children, level = 0, active = false, isLeaf = false, isExpanded, onClick, onToggle }: TreeNodeProps) {
+  const handleChevronClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent triggering the parent onClick
+    onToggle();
+  };
+
   return (
     <div>
       <div
@@ -286,11 +303,13 @@ function TreeNode({ label, icon, children, level = 0, active = false, isLeaf = f
         style={{ paddingLeft: `${level * 16 + 12}px` }}
       >
         {!isLeaf && children ? (
-          isExpanded ? (
-            <ChevronDownIcon size={14} className="text-gray-400 dark:text-gray-500 mr-2 flex-shrink-0" />
-          ) : (
-            <ChevronRightIcon size={14} className="text-gray-400 dark:text-gray-500 mr-2 flex-shrink-0" />
-          )
+          <div onClick={handleChevronClick} className="flex items-center">
+            {isExpanded ? (
+              <ChevronDownIcon size={14} className="text-gray-400 dark:text-gray-500 mr-2 flex-shrink-0" />
+            ) : (
+              <ChevronRightIcon size={14} className="text-gray-400 dark:text-gray-500 mr-2 flex-shrink-0" />
+            )}
+          </div>
         ) : (
           <span className="w-3.5 mr-2"></span>
         )}
@@ -307,32 +326,44 @@ interface ProjectOverviewProps {
 }
 
 function ProjectOverview({ project }: ProjectOverviewProps) {
+  const navigate = useNavigate();
+
   return (
     <div className="space-y-8 animate-fadeIn">
-      <div className="flex items-start">
-        <div className="h-16 w-16 rounded-2xl bg-purple-50 dark:bg-purple-900/30 border border-purple-100 dark:border-purple-800 flex items-center justify-center shadow-sm">
-          <BuildingIcon size={32} className="text-purple-600 dark:text-purple-400" />
-        </div>
-        <div className="ml-5">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
-            {project.name}
-          </h2>
-          <div className="flex items-center mt-1 text-sm text-gray-500 dark:text-gray-400">
-            <span className="flex items-center"><GlobeIcon size={14} className="mr-1" /> {project.region}</span>
-            <span className="mx-2">•</span>
-            <span className="flex items-center"><MapPinIcon size={14} className="mr-1" /> {project.country}</span>
+      <div className="flex items-start justify-between">
+        <div className="flex items-start">
+          <div className="h-16 w-16 rounded-2xl bg-purple-50 dark:bg-purple-900/30 border border-purple-100 dark:border-purple-800 flex items-center justify-center shadow-sm">
+            <BuildingIcon size={32} className="text-purple-600 dark:text-purple-400" />
           </div>
-          <div className="mt-3 flex items-center space-x-3">
-            <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${project.status === 'Active' ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-100 text-gray-800'}`}>
-              {project.status}
-            </span>
-            <span className="text-xs text-gray-500 border-l border-gray-200 pl-3">Started: {project.startDate}</span>
-            <span className="text-xs text-gray-500 border-l border-gray-200 pl-3">
-              Completion: {project.completionDate}
-            </span>
+          <div className="ml-5">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
+              {project.name}
+            </h2>
+            <div className="flex items-center mt-1 text-sm text-gray-500 dark:text-gray-400">
+              <span className="flex items-center"><GlobeIcon size={14} className="mr-1" /> {project.region}</span>
+              <span className="mx-2">•</span>
+              <span className="flex items-center"><MapPinIcon size={14} className="mr-1" /> {project.country}</span>
+            </div>
+            <div className="mt-3 flex items-center space-x-3">
+              <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${project.status === 'Active' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'}`}>
+                {project.status}
+              </span>
+              <span className="text-xs text-gray-500 dark:text-gray-400 border-l border-gray-200 dark:border-gray-700 pl-3">Started: {project.startDate}</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400 border-l border-gray-200 dark:border-gray-700 pl-3">
+                Completion: {project.completionDate}
+              </span>
+            </div>
           </div>
         </div>
+        <button
+          onClick={() => navigate(`/project/${project.id}`)}
+          className="px-5 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-xl hover:bg-blue-700 flex items-center shadow-sm hover:shadow-md transition-all"
+        >
+          <ArrowRightIcon size={18} className="mr-2" />
+          Show Workspace
+        </button>
       </div>
+
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow">
@@ -448,7 +479,7 @@ function ProjectOverview({ project }: ProjectOverviewProps) {
           </div>
         </div>
       </div>
-    </div>
+    </div >
   );
 }
 

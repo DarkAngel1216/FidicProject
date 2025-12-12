@@ -280,8 +280,7 @@ export const mockData: Region[] = [
               { id: 'di-1', description: 'Payment dispute with subcontractor X', status: 'Open', projectId: 'project-1', type: 'Cost Claim', dateRaised: '2025-08-28', clauseReference: 'C-14.7' },
             ],
             compliance: []
-          },
-          // ... other projects
+          }
         ],
       },
     ],

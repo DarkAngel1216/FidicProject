@@ -55,46 +55,7 @@ export function Sidebar({ language = 'english' }: SidebarProps) {
             name: isRTL ? 'عقد أوراسكوم' : 'Orascom Contract'
           }]
         }]
-      }, {
-        id: 'project-2',
-        name: isRTL ? 'توسعة ميناء الإسكندرية' : 'Alexandria Port Expansion',
-        subprojects: []
       }]
-    }, {
-      id: 'uae',
-      name: isRTL ? 'الإمارات العربية المتحدة' : 'UAE',
-      projects: [{
-        id: 'project-3',
-        name: isRTL ? 'مطار دبي T3' : 'Dubai Airport T3',
-        subprojects: [{
-          id: 'hvac',
-          name: isRTL ? 'نظام التكييف' : 'HVAC System',
-          contracts: [{
-            id: 'carrier',
-            name: isRTL ? 'عقد كارير' : 'Carrier Contract'
-          }]
-        }]
-      }]
-    }, {
-      id: 'qatar',
-      name: isRTL ? 'قطر' : 'Qatar',
-      projects: [{
-        id: 'project-4',
-        name: isRTL ? 'استاد قطر' : 'Qatar Stadium',
-        subprojects: []
-      }]
-    }]
-  }, {
-    id: 'europe',
-    name: isRTL ? 'أوروبا' : 'Europe',
-    countries: [{
-      id: 'germany',
-      name: isRTL ? 'ألمانيا' : 'Germany',
-      projects: []
-    }, {
-      id: 'france',
-      name: isRTL ? 'فرنسا' : 'France',
-      projects: []
     }]
   }];
 

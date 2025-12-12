@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { ProjectNavigation } from './ProjectNavigation';
 import { ProjectOverview } from './ProjectOverview';
 import { ProjectPreActivation } from './ProjectPreActivation';
@@ -6,12 +7,13 @@ import { ProjectActivation } from './ProjectActivation';
 import { ProjectPostActivation } from './ProjectPostActivation';
 import { ProjectReports } from './ProjectReports';
 import { LoaderIcon, LayoutDashboardIcon, FileUpIcon, CheckSquareIcon, CalendarClockIcon, BarChart3Icon } from 'lucide-react';
+import { findProjectById } from '../../data/mockData';
 
 interface ProjectWorkspaceProps {
-  projectId: string;
-  projectName: string;
-  region: string;
-  country: string;
+  projectId?: string; // Optional - will be read from URL if not provided
+  projectName?: string;
+  region?: string;
+  country?: string;
   language?: string;
   direction?: 'ltr' | 'rtl';
 }
@@ -70,13 +72,23 @@ const getInitialPhases = (language: string) => {
 };
 
 export function ProjectWorkspace({
-  projectId,
-  projectName,
-  region,
-  country,
+  projectId: propProjectId,
+  projectName: propProjectName,
+  region: propRegion,
+  country: propCountry,
   language = 'english',
   direction = 'ltr'
 }: ProjectWorkspaceProps) {
+  // Read project ID from URL if not provided via props
+  const { projectId: urlProjectId } = useParams<{ projectId: string }>();
+  const projectId = propProjectId || urlProjectId || 'project-1';
+
+  // Load project data from mock data
+  const projectData = findProjectById(projectId);
+  const projectName = propProjectName || projectData?.name || 'Unknown Project';
+  const region = propRegion || projectData?.region || 'Unknown Region';
+  const country = propCountry || projectData?.country || 'Unknown Country';
+
   const [currentPhase, setCurrentPhase] = useState('overview');
   const [loading, setLoading] = useState(true);
   const [projectStatus, setProjectStatus] = useState('Pre-Activation');

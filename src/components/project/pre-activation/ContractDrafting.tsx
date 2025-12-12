@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { ArrowRightIcon, ZapIcon, BrainIcon, HistoryIcon, CheckIcon, FileTextIcon, CodeIcon, UserIcon, XIcon, ThumbsUpIcon, ThumbsDownIcon, SendIcon, GitCommitIcon, EditIcon, GitBranchIcon, DownloadIcon, UploadIcon } from 'lucide-react';
 import jsPDF from 'jspdf';
 import { AIAssistant } from '../../ai/AIAssistant';
@@ -8,8 +8,42 @@ import 'react-quill/dist/quill.snow.css';
 import { useTemplates } from '../../../context/TemplateContext';
 import * as Diff from 'diff';
 
+// Helper function to strip HTML tags and decode entities while preserving line breaks
+const stripHtml = (html: string): string => {
+  if (!html || typeof html !== 'string') return '';
+
+  // Create a temporary div to parse HTML
+  const tmp = document.createElement('div');
+  tmp.innerHTML = html
+    // Convert <br> tags to newlines
+    .replace(/<br\s*\/?>/gi, '\n')
+    // Convert </p> tags to double newlines (paragraph breaks)
+    .replace(/<\/p>/gi, '\n\n')
+    // Convert </div> tags to newlines
+    .replace(/<\/div>/gi, '\n')
+    // Convert </li> tags to newlines
+    .replace(/<\/li>/gi, '\n');
+
+  return tmp.textContent || tmp.innerText || '';
+};
+
+// Helper function to convert plain text to HTML for ReactQuill
+const textToHtml = (text: string): string => {
+  if (!text) return '';
+  // Split by newlines and wrap each line in a <p> tag
+  return text
+    .split('\n')
+    .map(line => `<p>${line || '<br>'}</p>`)
+    .join('');
+};
+
 const generateDiff = (original, modified) => {
-  const changes = Diff.diffLines(original, modified);
+  // Strip HTML tags before comparison
+  // Handles both plain text and HTML content
+  const originalText = stripHtml(original || '');
+  const modifiedText = stripHtml(modified || '');
+
+  const changes = Diff.diffLines(originalText, modifiedText);
   const result = [];
   let originalLine = 1;
   let modifiedLine = 1;
@@ -47,8 +81,12 @@ export function ContractDrafting({
   const { templates, addTemplate } = useTemplates();
   const [selectedTemplate, setSelectedTemplate] = useState('fidic-red-book');
   const [showAiAssistant, setShowAiAssistant] = useState(false);
-  const [contractContent, setContractContent] = useState(templates.find(t => t.id === selectedTemplate)?.content || '');
-  const [originalContractContent, setOriginalContractContent] = useState(templates.find(t => t.id === selectedTemplate)?.content || '');
+
+  // Convert plain text template to HTML for ReactQuill
+  const initialContent = textToHtml(templates.find(t => t.id === 'fidic-red-book')?.content || '');
+  const [contractContent, setContractContent] = useState(initialContent);
+  const [originalContractContent, setOriginalContractContent] = useState(initialContent);
+
   const [viewMode, setViewMode] = useState('edit'); // 'edit' or 'diff'
   const [showNamePopup, setShowNamePopup] = useState(false);
   const [draftName, setDraftName] = useState('');
@@ -66,8 +104,10 @@ export function ContractDrafting({
     const template = templates.find(t => t.id === templateId);
     if (template) {
       setSelectedTemplate(templateId);
-      setContractContent(template.content);
-      setOriginalContractContent(template.content);
+      // Convert plain text to HTML for ReactQuill
+      const htmlContent = textToHtml(template.content);
+      setContractContent(htmlContent);
+      setOriginalContractContent(htmlContent);
       setIsSaved(false);
     }
   };
@@ -288,46 +328,47 @@ export function ContractDrafting({
                   ) : (
                     <div className="w-full h-[600px] text-sm text-gray-800 dark:text-gray-300 overflow-y-auto font-mono bg-white dark:bg-gray-900">
                       <div className="flex text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 p-2 border-b border-gray-200 dark:border-gray-700">
-                        <div className="w-1/2 border-r border-gray-200 dark:border-gray-700 px-2">
-                          <div className="flex items-center">
-                            <GitBranchIcon size={12} className="mr-1" />
-                            {isRTL ? 'النسخة السابقة' : 'Previous Version'}
-                          </div>
-                        </div>
-                        <div className="w-1/2 px-2">
-                          <div className="flex items-center">
-                            <GitBranchIcon size={12} className="mr-1" />
-                            {isRTL ? 'النسخة الحالية' : 'Current Version'}
-                          </div>
-                        </div>
+                        <GitCommitIcon size={14} className="mr-2" />
+                        <span>{isRTL ? 'عرض التغييرات' : 'Changes'}</span>
                       </div>
                       {diffResult.map((line, index) => {
-                        return (
-                          <div key={index} className={`flex text-xs ${line.type === 'added' ? 'bg-green-50 dark:bg-green-900/10 hover:bg-green-100 dark:hover:bg-green-900/20' :
-                              line.type === 'removed' ? 'bg-red-50 dark:bg-red-900/10 hover:bg-red-100 dark:hover:bg-red-900/20' :
-                                'hover:bg-gray-50 dark:hover:bg-gray-800'
-                            }`}>
-                            {/* Original Line Number */}
-                            <div className="w-10 flex-shrink-0 text-center text-gray-400 dark:text-gray-500 border-r border-gray-200 dark:border-gray-700 py-1 select-none">
-                              {line.oLine || ''}
+                        if (line.type === 'unchanged') {
+                          return (
+                            <div key={index} className="flex hover:bg-gray-50 dark:hover:bg-gray-800 border-b border-gray-100 dark:border-gray-800">
+                              <div className="w-12 flex-shrink-0 text-center text-gray-400 dark:text-gray-500 bg-gray-50 dark:bg-gray-800 py-1 px-2 select-none text-xs border-r border-gray-200 dark:border-gray-700">
+                                {line.oLine}
+                              </div>
+                              <div className="flex-1 px-3 py-1 whitespace-pre-wrap break-words text-gray-700 dark:text-gray-300">
+                                {line.content || '\u00A0'}
+                              </div>
                             </div>
-                            {/* Original Content */}
-                            <div className={`w-[calc(50%-2.5rem)] border-r border-gray-200 dark:border-gray-700 px-2 py-1 whitespace-pre-wrap break-words ${line.type === 'removed' ? 'bg-red-100/50 dark:bg-red-900/20' : ''
-                              }`}>
-                              {line.type === 'removed' || line.type === 'unchanged' ? line.content : ''}
+                          );
+                        } else if (line.type === 'removed') {
+                          return (
+                            <div key={index} className="flex bg-red-50 dark:bg-red-900/10 hover:bg-red-100 dark:hover:bg-red-900/20 border-b border-red-100 dark:border-red-900/30">
+                              <div className="w-12 flex-shrink-0 text-center text-red-400 dark:text-red-500 bg-red-100 dark:bg-red-900/20 py-1 px-2 select-none text-xs border-r border-red-200 dark:border-red-900/40">
+                                {line.oLine}
+                              </div>
+                              <div className="flex-1 px-3 py-1 whitespace-pre-wrap break-words text-red-800 dark:text-red-300">
+                                <span className="text-red-600 dark:text-red-400 font-bold mr-2">-</span>
+                                {line.content || '\u00A0'}
+                              </div>
                             </div>
-
-                            {/* Modified Line Number */}
-                            <div className="w-10 flex-shrink-0 text-center text-gray-400 dark:text-gray-500 border-r border-gray-200 dark:border-gray-700 py-1 select-none">
-                              {line.mLine || ''}
+                          );
+                        } else if (line.type === 'added') {
+                          return (
+                            <div key={index} className="flex bg-green-50 dark:bg-green-900/10 hover:bg-green-100 dark:hover:bg-green-900/20 border-b border-green-100 dark:border-green-900/30">
+                              <div className="w-12 flex-shrink-0 text-center text-green-400 dark:text-green-500 bg-green-100 dark:bg-green-900/20 py-1 px-2 select-none text-xs border-r border-green-200 dark:border-green-900/40">
+                                {line.mLine}
+                              </div>
+                              <div className="flex-1 px-3 py-1 whitespace-pre-wrap break-words text-green-800 dark:text-green-300">
+                                <span className="text-green-600 dark:text-green-400 font-bold mr-2">+</span>
+                                {line.content || '\u00A0'}
+                              </div>
                             </div>
-                            {/* Modified Content */}
-                            <div className={`w-[calc(50%-2.5rem)] px-2 py-1 whitespace-pre-wrap break-words ${line.type === 'added' ? 'bg-green-100/50 dark:bg-green-900/20' : ''
-                              }`}>
-                              {line.type === 'added' || line.type === 'unchanged' ? line.content : ''}
-                            </div>
-                          </div>
-                        );
+                          );
+                        }
+                        return null;
                       })}
                     </div>
                   )}
